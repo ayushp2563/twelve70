@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>twelve70 — Database Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d0d0f; --surface: #16161a; --surface2: #1e1e24; --surface3: #26262e;
+      --border: rgba(255,255,255,0.08); --text: #e8e8ec; --muted: #6b6b7a;
+      --accent: #7c6aff; --green: #22c55e; --yellow: #fbbf24; --red: #ef4444;
+      --radius: 10px; --mono: 'JetBrains Mono', monospace;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Top bar ── */
+    .topbar { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .topbar h1 { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, #7c6aff, #ff6ab0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .topbar-nav { display: flex; gap: 8px; margin-left: auto; }
+    .topbar-nav a { padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; text-decoration: none; color: var(--muted); border: 1px solid var(--border); transition: all 0.15s; }
+    .topbar-nav a:hover, .topbar-nav a.active { color: var(--text); border-color: rgba(255,255,255,0.2); background: var(--surface2); }
+    .db-badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 99px; background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+
+    /* ── Layout ── */
+    .layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    .sidebar-search { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--text); font-size: 0.8rem; outline: none; }
+    .sidebar-search:focus { border-color: var(--accent); }
+    .table-list { overflow-y: auto; flex: 1; padding: 8px; }
+    .table-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: var(--muted); transition: all 0.15s; font-family: var(--mono); }
+    .table-item:hover { background: var(--surface2); color: var(--text); }
+    .table-item.active { background: rgba(124,106,255,0.12); color: var(--accent); }
+    .table-item .row-count { font-size: 0.68rem; background: var(--surface3); padding: 1px 5px; border-radius: 3px; }
+    .table-group-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 10px 10px 4px; }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+    .toolbar-title { font-size: 0.9rem; font-weight: 600; font-family: var(--mono); }
+    .toolbar-sub { font-size: 0.75rem; color: var(--muted); }
+    .toolbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .btn { padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text); transition: all 0.15s; }
+    .btn:hover { border-color: rgba(255,255,255,0.2); }
+    .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; color: var(--text); font-size: 0.78rem; width: 200px; outline: none; }
+    .search-input:focus { border-color: var(--accent); }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .tab { padding: 8px 16px; font-size: 0.8rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Content area ── */
+    .content { flex: 1; overflow: auto; }
+
+    /* ── Table display ── */
+    .data-table-wrap { overflow: auto; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    table.data-table th { position: sticky; top: 0; background: var(--surface2); padding: 8px 12px; text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; font-family: var(--mono); font-size: 0.72rem; z-index: 1; }
+    table.data-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; max-width: 280px; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); color: var(--text); }
+    table.data-table tr:hover td { background: var(--surface2); }
+    .td-null { color: var(--muted); font-style: italic; }
+    .td-num { color: #7dd3fc; }
+    .td-bool-1 { color: var(--green); }
+    .td-bool-0 { color: var(--red); }
+
+    /* ── Pagination ── */
+    .pagination { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; color: var(--muted); flex-shrink: 0; }
+    .page-btn { padding: 3px 10px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.75rem; }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { margin: 0 auto; }
+
+    /* ── Schema view ── */
+    .schema-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
+    .schema-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .schema-card-title { padding: 10px 14px; font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+    table.schema-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    table.schema-table th { padding: 6px 12px; text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 0.68rem; text-transform: uppercase; }
+    table.schema-table td { padding: 6px 12px; border-bottom: 1px solid var(--border); font-family: var(--mono); }
+    .key-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem; font-weight: 600; }
+    .key-PRI { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .key-MUL { background: rgba(124,106,255,0.15); color: var(--accent); }
+    .key-UNI { background: rgba(34,197,94,0.15); color: var(--green); }
+
+    /* ── Overview cards ── */
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 16px; }
+    .overview-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; cursor: pointer; transition: all 0.15s; }
+    .overview-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .overview-card-name { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+    .overview-card-meta { font-size: 0.72rem; color: var(--muted); display: flex; gap: 12px; }
+    .overview-card-rows { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+
+    /* ── Empty / loading ── */
+    .center-msg { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); gap: 8px; }
+    .center-msg .icon { font-size: 2.5rem; }
+    .skeleton { background: linear-gradient(90deg, var(--surface2) 25%, rgba(255,255,255,0.04) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>✦ twelve70</h1>
+  <span class="db-badge" id="dbStatus">⏳ Connecting…</span>
+  <div class="topbar-nav">
+    <a href="/">Admin</a>
+    <a href="/outfit-builder.html">Outfit Builder</a>
+    <a href="/db-explorer.html" class="active">DB Explorer</a>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Sidebar: table list -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <input class="sidebar-search" id="sidebarSearch" placeholder="Filter tables…" oninput="filterSidebar(this.value)">
+    </div>
+    <div class="table-list" id="tableList">
+      <div class="center-msg" style="padding-top:40px"><div class="icon">⏳</div></div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main" id="main">
+    <div class="center-msg">
+      <div class="icon">🗄️</div>
+      <div style="font-size:0.9rem">Select a table from the sidebar</div>
+      <div style="font-size:0.78rem">or view the overview below</div>
+      <button class="btn btn-accent" style="margin-top:8px" onclick="showOverview()">View All Tables</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+let allTables = [];
+let currentTable = null;
+let currentPage = 1;
+let currentSearch = '';
+let currentTab = 'data';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const r = await fetch('/api/db/tables');
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error);
+    allTables = d.tables;
+    document.getElementById('dbStatus').textContent = `✅ ${allTables.length} tables`;
+    document.getElementById('dbStatus').style.background = 'rgba(34,197,94,0.12)';
+    renderSidebar(allTables);
+    showOverview();
+  } catch (err) {
+    document.getElementById('dbStatus').textContent = '❌ DB offline';
+    document.getElementById('dbStatus').style.background = 'rgba(239,68,68,0.12)';
+    document.getElementById('dbStatus').style.color = '#ef4444';
+    document.getElementById('tableList').innerHTML = `<div class="center-msg" style="padding:20px;font-size:0.75rem">Cannot reach DB.<br>Is Docker running?</div>`;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sidebar
+// ─────────────────────────────────────────────────────────────────────────────
+function renderSidebar(tables) {
+  const list = document.getElementById('tableList');
+  if (!tables.length) { list.innerHTML = '<div class="table-group-label">No tables found</div>'; return; }
+  list.innerHTML = tables.map(t => `
+    <div class="table-item ${currentTable === t.name ? 'active' : ''}" onclick="openTable('${t.name}')" id="ti-${t.name}">
+      <span style="overflow:hidden;text-overflow:ellipsis">${t.name}</span>
+      <span class="row-count">${fmt(t.approxRows)}</span>
+    </div>`).join('');
+}
+
+function filterSidebar(q) {
+  const filtered = q ? allTables.filter(t => t.name.toLowerCase().includes(q.toLowerCase())) : allTables;
+  renderSidebar(filtered);
+}
+
+function fmt(n) { return n == null ? '?' : Number(n).toLocaleString(); }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Overview
+// ─────────────────────────────────────────────────────────────────────────────
+function showOverview() {
+  currentTable = null;
+  document.querySelectorAll('.table-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('main').innerHTML = `
+    <div class="toolbar">
+      <div>
+        <div class="toolbar-title">Database Overview</div>
+        <div class="toolbar-sub">${allTables.length} tables</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="overview-grid">
+        ${allTables.map(t => `
+          <div class="overview-card" onclick="openTable('${t.name}')">
+            <div class="overview-card-name">${t.name}</div>
+            <div class="overview-card-rows">${fmt(t.approxRows)}</div>
+            <div class="overview-card-meta">
+              <span>${t.sizeKB || 0} KB</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Open Table
+// ─────────────────────────────────────────────────────────────────────────────
+function openTable(name) {
+  currentTable = name;
+  currentPage  = 1;
+  currentSearch = '';
+  currentTab   = 'data';
+  document.querySelectorAll('.table-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(`ti-${name}`);
+  if (el) { el.classList.add('active'); el.scrollIntoView({ block: 'nearest' }); }
+  renderTableShell(name);
+  loadData(name);
+}
+
+function renderTableShell(name) {
+  const meta = allTables.find(t => t.name === name) || {};
+  document.getElementById('main').innerHTML = `
+    <div class="toolbar">
+      <div>
+        <div class="toolbar-title">${name}</div>
+        <div class="toolbar-sub">~${fmt(meta.approxRows)} rows · ${meta.sizeKB || 0} KB</div>
+      </div>
+      <div class="toolbar-right">
+        <input class="search-input" id="searchInput" placeholder="Search rows…" value="${currentSearch}"
+          onkeydown="if(event.key==='Enter'){currentSearch=this.value;currentPage=1;loadData(currentTable)}">
+        <button class="btn" onclick="currentSearch=document.getElementById('searchInput').value;currentPage=1;loadData(currentTable)">Search</button>
+        <button class="btn" onclick="exportCsv('${name}')">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" id="tab-data" onclick="switchTab('data','${name}')">Data</div>
+      <div class="tab" id="tab-schema" onclick="switchTab('schema','${name}')">Schema</div>
+    </div>
+    <div class="content" id="tableContent">
+      <div class="center-msg"><div class="skeleton" style="width:80%;height:20px;margin-bottom:8px"></div></div>
+    </div>
+    <div class="pagination" id="pagination" style="display:none"></div>`;
+}
+
+function switchTab(tab, name) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById('pagination').style.display = 'none';
+  if (tab === 'data') loadData(name);
+  else loadSchema(name);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Load Data
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadData(name) {
+  const content = document.getElementById('tableContent');
+  if (!content) return;
+  content.innerHTML = `<div class="center-msg"><div class="icon" style="font-size:1.5rem">⏳</div></div>`;
+
+  const params = new URLSearchParams({ page: currentPage, limit: 50 });
+  if (currentSearch) params.set('search', currentSearch);
+
+  const r = await fetch(`/api/db/tables/${name}/rows?${params}`);
+  const d = await r.json();
+  if (!d.success) { content.innerHTML = `<div class="center-msg" style="color:#ef4444">${d.error}</div>`; return; }
+
+  if (!d.rows.length) { content.innerHTML = `<div class="center-msg"><div class="icon">📭</div>No rows found</div>`; return; }
+
+  const cols = d.columns;
+  content.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${d.rows.map(row => `
+          <tr>${cols.map(c => {
+            const v = row[c];
+            if (v === null || v === undefined) return `<td class="td-null">NULL</td>`;
+            if (typeof v === 'number') return `<td class="td-num">${v}</td>`;
+            if (v === 1 || v === '1') return `<td class="td-bool-1">1</td>`;
+            if (v === 0 || v === '0') return `<td class="td-bool-0">0</td>`;
+            const sv = String(v);
+            return `<td title="${sv.replace(/"/g,'&quot;')}">${sv.length > 60 ? sv.slice(0,60)+'…' : sv}</td>`;
+          }).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  // Pagination
+  const pag = d.pagination;
+  const pagEl = document.getElementById('pagination');
+  pagEl.style.display = 'flex';
+  pagEl.innerHTML = `
+    <button class="page-btn" onclick="currentPage--;loadData('${name}')" ${pag.page<=1?'disabled':''}>← Prev</button>
+    <span class="page-info">Page ${pag.page} of ${pag.totalPages} · ${fmt(pag.total)} rows</span>
+    <button class="page-btn" onclick="currentPage++;loadData('${name}')" ${pag.page>=pag.totalPages?'disabled':''}>Next →</button>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Load Schema
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadSchema(name) {
+  const content = document.getElementById('tableContent');
+  content.innerHTML = `<div class="center-msg"><div class="icon">⏳</div></div>`;
+  const r = await fetch(`/api/db/tables/${name}/schema`);
+  const d = await r.json();
+  if (!d.success) { content.innerHTML = `<div class="center-msg" style="color:#ef4444">${d.error}</div>`; return; }
+
+  const colRows = d.columns.map(c => `
+    <tr>
+      <td style="font-weight:600">${c.name}</td>
+      <td style="color:#7dd3fc">${c.type}</td>
+      <td>${c.nullable === 'YES' ? '<span style="color:var(--green)">YES</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
+      <td>${c.keyType ? `<span class="key-badge key-${c.keyType}">${c.keyType}</span>` : ''}</td>
+      <td style="color:var(--muted)">${c.defaultVal ?? ''}</td>
+      <td style="color:var(--muted);font-size:0.68rem">${c.extra}</td>
+    </tr>`).join('');
+
+  const idxRows = d.indexes.map(i => `
+    <tr>
+      <td>${i.name}</td>
+      <td>${i.column}</td>
+      <td>${i.nonUnique ? '' : '<span class="key-badge key-UNI">UNIQUE</span>'}</td>
+    </tr>`).join('');
+
+  content.innerHTML = `
+    <div class="schema-grid">
+      <div class="schema-card" style="grid-column:1/-1">
+        <div class="schema-card-title">Columns (${d.columns.length})</div>
+        <table class="schema-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Nullable</th><th>Key</th><th>Default</th><th>Extra</th></tr></thead>
+          <tbody>${colRows}</tbody>
+        </table>
+      </div>
+      ${d.indexes.length ? `
+      <div class="schema-card" style="grid-column:1/-1">
+        <div class="schema-card-title">Indexes (${d.indexes.length})</div>
+        <table class="schema-table">
+          <thead><tr><th>Index Name</th><th>Column</th><th>Type</th></tr></thead>
+          <tbody>${idxRows}</tbody>
+        </table>
+      </div>` : ''}
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Export CSV
+// ─────────────────────────────────────────────────────────────────────────────
+function exportCsv(name) {
+  window.open(`/api/db/tables/${name}/export`, '_blank');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Boot
+// ─────────────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

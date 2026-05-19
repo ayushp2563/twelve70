@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>twelve70 - Color Matching Dashboard</title>
+    <style>
+        :root {
+            --primary: #4b91d2;
+            --dark: #1a1a1a;
+            --light: #f4f4f4;
+            --white: #ffffff;
+            --border: #dddddd;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-active { background-color: #e6ffed; color: #22863a; }
+        .badge-inactive { background-color: #ffeef0; color: #cb2431; }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filters input {
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>twelve70 Color Dashboard</h1>
+            <div style="display:flex;align-items:center;gap:16px">
+                <div id="stats">Loading stats...</div>
+                <a href="/outfit-builder.html" style="padding:8px 16px;background:#4b91d2;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;font-size:0.88rem">✦ Outfit Builder →</a>
+                <a href="/db-explorer.html" style="padding:8px 16px;background:#1e1e24;color:#e8e8ec;border:1px solid #333;border-radius:6px;text-decoration:none;font-weight:600;font-size:0.88rem">🗄 DB Explorer →</a>
+            </div>
+        </header>
+
+        <div class="card">
+            <h2>Add New Color Combination</h2>
+            <form id="comboForm">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div class="form-group">
+                        <label for="topColor">Top Color</label>
+                        <input type="text" id="topColor" required placeholder="e.g. black">
+                    </div>
+                    <div class="form-group">
+                        <label for="bottomColor">Bottom Color</label>
+                        <input type="text" id="bottomColor" required placeholder="e.g. navy">
+                    </div>
+                    <div class="form-group">
+                        <label for="outerwearColor">Outerwear Color</label>
+                        <input type="text" id="outerwearColor" required placeholder="e.g. black">
+                    </div>
+                    <div class="form-group">
+                        <label for="footwearColor">Footwear Color</label>
+                        <input type="text" id="footwearColor" required placeholder="e.g. white">
+                    </div>
+                    <div class="form-group">
+                        <label for="topOuterColor">Recommended Top Outer Color</label>
+                        <input type="text" id="topOuterColor" required placeholder="e.g. charcoal">
+                    </div>
+                </div>
+                <button type="submit">Create Combo</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Color Combinations</h2>
+            <div class="filters">
+                <input type="text" id="filterOuterwear" placeholder="Filter by Outerwear...">
+                <input type="text" id="filterTop" placeholder="Filter by Top...">
+                <button onclick="loadCombos()">Search</button>
+            </div>
+            <table id="comboTable">
+                <thead>
+                    <tr>
+                        <th>Top</th>
+                        <th>Outerwear</th>
+                        <th>Bottom</th>
+                        <th>Footwear</th>
+                        <th>Result (Top Outer)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="comboBody">
+                    <tr><td colspan="6">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                const data = await res.json();
+                document.getElementById('stats').innerHTML = `
+                    <strong>${data.totalColors}</strong> Colors | 
+                    <strong>${data.totalCombos}</strong> Combinations
+                `;
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadCombos() {
+            const outerwear = document.getElementById('filterOuterwear').value;
+            const top = document.getElementById('filterTop').value;
+            
+            let url = '/api/admin/combos';
+            const params = new URLSearchParams();
+            if (outerwear) params.append('outerwear', outerwear);
+            if (top) params.append('top', top);
+            if (params.toString()) url += '?' + params.toString();
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const body = document.getElementById('comboBody');
+                body.innerHTML = '';
+
+                data.combos.forEach(c => {
+                    const row = `
+                        <tr>
+                            <td>${c.top_color}</td>
+                            <td>${c.outerwear_color}</td>
+                            <td>${c.bottom_color}</td>
+                            <td>${c.footwear_color}</td>
+                            <td style="font-weight:bold; color:var(--primary)">${c.top_outer_color}</td>
+                            <td><span class="badge ${c.is_active ? 'badge-active' : 'badge-inactive'}">${c.is_active ? 'Active' : 'Inactive'}</span></td>
+                        </tr>
+                    `;
+                    body.innerHTML += row;
+                });
+            } catch (e) { 
+                document.getElementById('comboBody').innerHTML = '<tr><td colspan="6">Error loading data</td></tr>';
+            }
+        }
+
+        document.getElementById('comboForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = {
+                topColor: document.getElementById('topColor').value,
+                bottomColor: document.getElementById('bottomColor').value,
+                outerwearColor: document.getElementById('outerwearColor').value,
+                footwearColor: document.getElementById('footwearColor').value,
+                topOuterColor: document.getElementById('topOuterColor').value,
+                is_active: 1
+            };
+
+            try {
+                const res = await fetch('/api/admin/combos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (res.ok) {
+                    alert('Combo added successfully!');
+                    document.getElementById('comboForm').reset();
+                    loadCombos();
+                    fetchStats();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (e) { alert('Failed to save combo'); }
+        };
+
+        // Initial load
+        fetchStats();
+        loadCombos();
+    </script>
+</body>
+</html>

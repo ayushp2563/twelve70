@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>twelve70 — Outfit Color Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --surface2: #1e1e24;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8e8ec;
+      --muted: #6b6b7a;
+      --accent: #7c6aff;
+      --accent2: #ff6ab0;
+      --green: #22c55e;
+      --radius: 14px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Steps ── */
+    .steps {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .step-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface2);
+      transition: all 0.2s;
+    }
+    .step-pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124,106,255,0.1);
+    }
+    .step-pill.done {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(34,197,94,0.1);
+    }
+    .step-pill .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Color Grid ── */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      min-height: 80px;
+    }
+
+    .color-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 10px 6px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background: var(--surface2);
+      transition: all 0.18s ease;
+      position: relative;
+    }
+    .color-chip:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.15); }
+    .color-chip.selected {
+      border-color: var(--accent);
+      background: rgba(124,106,255,0.12);
+    }
+    .color-chip.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 4px; right: 6px;
+      font-size: 0.65rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .chip-swatch {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      flex-shrink: 0;
+    }
+    .chip-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .chip-score {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ── Loading skeleton ── */
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+    }
+    .skeleton {
+      height: 90px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--surface2) 25%, rgba(255,255,255,0.04) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+    /* ── Predict button ── */
+    .predict-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+    .predict-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .predict-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    /* ── Right panel — Summary ── */
+    .summary-panel .card { margin-bottom: 16px; }
+
+    .outfit-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .outfit-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .outfit-row.empty { opacity: 0.35; }
+    .outfit-row.predicted { border-color: var(--accent); background: rgba(124,106,255,0.08); }
+
+    .outfit-swatch {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .outfit-info { flex: 1; min-width: 0; }
+    .outfit-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .outfit-value { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Prediction result ── */
+    .result-card {
+      background: linear-gradient(135deg, rgba(124,106,255,0.12), rgba(255,106,176,0.08));
+      border: 1px solid rgba(124,106,255,0.3);
+      border-radius: var(--radius);
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+    .result-primary {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .result-swatch {
+      width: 56px; height: 56px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.15);
+      flex-shrink: 0;
+    }
+    .result-name { font-size: 1.2rem; font-weight: 700; }
+    .result-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--green);
+      background: rgba(34,197,94,0.1);
+      padding: 3px 10px;
+      border-radius: 99px;
+      margin-top: 4px;
+    }
+    .result-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(124,106,255,0.2);
+      color: var(--accent);
+      margin-left: 6px;
+    }
+
+    .reasons-list {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .reasons-list li {
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 3px 0;
+      padding-left: 14px;
+      position: relative;
+    }
+    .reasons-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    .alts-title { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin: 14px 0 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .alts-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .alt-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .alt-chip:hover { border-color: var(--accent); }
+    .alt-swatch { width: 14px; height: 14px; border-radius: 3px; }
+
+    /* ── Reset ── */
+    .reset-btn {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.83rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 10px;
+    }
+    .reset-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    /* ── Match badge colours ── */
+    .badge-exact   { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .badge-partial { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .badge-scored  { background: rgba(124,106,255,0.2); color: #7c6aff; }
+    .badge-fallback{ background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>✦ Outfit Color Builder</h1>
+    <p>Pick each garment — we'll suggest the perfect layer combo in real time</p>
+    <div style="margin-top:12px;display:flex;justify-content:center;gap:10px">
+      <a href="/" style="font-size:0.78rem;color:#6b6b7a;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:4px 12px;border-radius:99px">Admin</a>
+      <a href="/db-explorer.html" style="font-size:0.78rem;color:#6b6b7a;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:4px 12px;border-radius:99px">🗄 DB Explorer</a>
+    </div>
+  </div>
+
+<div class="layout">
+  <!-- LEFT: step-by-step picker -->
+  <div>
+    <!-- Step pills -->
+    <div class="steps" id="stepPills">
+      <div class="step-pill active" data-step="0"><span class="dot"></span>Top</div>
+      <div class="step-pill" data-step="1"><span class="dot"></span>Bottom</div>
+      <div class="step-pill" data-step="2"><span class="dot"></span>Outerwear</div>
+      <div class="step-pill" data-step="3"><span class="dot"></span>Footwear</div>
+      <div class="step-pill" data-step="4"><span class="dot"></span>Predict</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title" id="stepTitle">Choose your Top color</div>
+      <div class="color-grid" id="colorGrid">
+        <!-- skeleton on load -->
+        <div class="skeleton-grid" id="skeleton" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px">
+          ${Array(12).fill('<div class="skeleton"></div>').join('')}
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <button class="predict-btn" id="predictBtn" disabled onclick="doPrediction()">
+        🔮 Predict Top Outer Color
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: summary + result -->
+  <div class="summary-panel">
+    <div class="card">
+      <div class="section-title">Your Outfit</div>
+      <div class="outfit-preview">
+        <div class="outfit-row empty" id="row-top">
+          <div class="outfit-swatch" id="swatch-top" style="background:#333"></div>
+          <div class="outfit-info">
+            <div class="outfit-label">Top</div>
+            <div class="outfit-value" id="val-top">—</div>
+          </div>
+        </div>
+        <div class="outfit-row empty" id="row-bottom">
+          <div class="outfit-swatch" id="swatch-bottom" style="background:#333"></div>
+          <div class="outfit-info">
+            <div class="outfit-label">Bottom</div>
+            <div class="outfit-value" id="val-bottom">—</div>
+          </div>
+        </div>
+        <div class="outfit-row empty" id="row-outerwear">
+          <div class="outfit-swatch" id="swatch-outerwear" style="background:#333"></div>
+          <div class="outfit-info">
+            <div class="outfit-label">Outerwear</div>
+            <div class="outfit-value" id="val-outerwear">—</div>
+          </div>
+        </div>
+        <div class="outfit-row empty" id="row-footwear">
+          <div class="outfit-swatch" id="swatch-footwear" style="background:#333"></div>
+          <div class="outfit-info">
+            <div class="outfit-label">Footwear</div>
+            <div class="outfit-value" id="val-footwear">—</div>
+          </div>
+        </div>
+        <div class="outfit-row empty predicted" id="row-outer" style="border-style:dashed">
+          <div class="outfit-swatch" id="swatch-outer" style="background:#333"></div>
+          <div class="outfit-info">
+            <div class="outfit-label">Top Outer (predicted)</div>
+            <div class="outfit-value" id="val-outer">—</div>
+          </div>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">↺ Start over</button>
+    </div>
+
+    <!-- Prediction result -->
+    <div id="resultArea"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+const state = { top: null, bottom: null, outerwear: null, footwear: null };
+const STEPS = ['top','bottom','outerwear','footwear'];
+const STEP_TITLES = [
+  'Choose your Top color',
+  'Choose your Bottom color',
+  'Choose your Outerwear color',
+  'Choose your Footwear color',
+  'Ready to predict!',
+];
+let currentStep = 0;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// API calls
+// ─────────────────────────────────────────────────────────────────────────────
+async function fetchOptions(step) {
+  const params = new URLSearchParams();
+  if (state.top)       params.set('topColor', state.top.color);
+  if (state.bottom)    params.set('bottomColor', state.bottom.color);
+  if (state.outerwear) params.set('outerwearColor', state.outerwear.color);
+
+  const endpoints = {
+    top:       '/api/outfit/step/tops',
+    bottom:    '/api/outfit/step/bottom?' + params,
+    outerwear: '/api/outfit/step/outerwear?' + params,
+    footwear:  '/api/outfit/step/footwear?' + params,
+  };
+
+  try {
+    const r = await fetch(endpoints[step]);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || 'API returned failure');
+    return d.options || [];
+  } catch (err) {
+    console.error(`fetchOptions(${step}) failed:`, err);
+    document.getElementById('colorGrid').innerHTML =
+      `<div class="empty-state" style="grid-column:1/-1">
+        <div class="icon">⚠️</div>
+        Could not load colors — make sure the server is running on port 3000.<br>
+        <small style="margin-top:6px;display:block">Error: ${err.message}</small>
+      </div>`;
+    return [];
+  }
+}
+
+async function doPrediction() {
+  if (!state.top || !state.bottom || !state.outerwear || !state.footwear) return;
+  document.getElementById('resultArea').innerHTML = `
+    <div class="card"><div class="skeleton-grid" style="display:grid;grid-template-columns:1fr;gap:10px">
+      <div class="skeleton" style="height:100px"></div>
+      <div class="skeleton" style="height:40px"></div>
+    </div></div>`;
+
+  const r = await fetch('/api/outfit/predict-outer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topColor:      state.top.color,
+      bottomColor:   state.bottom.color,
+      outerwearColor: state.outerwear.color,
+      footwearColor: state.footwear.color,
+    }),
+  });
+  const d = await r.json();
+  if (!d.success) {
+    document.getElementById('resultArea').innerHTML =
+      `<div class="card"><p style="color:#ef4444">Error: ${d.error}</p></div>`;
+    return;
+  }
+
+  const res = d.data;
+  const p = res.primary;
+
+  // Update summary row
+  updateRow('outer', p.color, p.hex, false);
+
+  const badgeClass = `badge-${res.matchType}`;
+  const altsHtml = res.alternatives.length
+    ? `<div class="alts-title">Alternatives</div>
+       <div class="alts-row">${res.alternatives.map(a =>
+         `<div class="alt-chip" onclick="applyAlt('${a.color}','${a.hex}')">
+            <div class="alt-swatch" style="background:${a.hex}"></div>
+            <span>${a.color}</span>
+            <span style="color:var(--muted);font-size:0.68rem">${a.score}</span>
+          </div>`).join('')}</div>` : '';
+
+  const reasonsHtml = p.reasons.length
+    ? `<ul class="reasons-list">${p.reasons.map(r => `<li>${r}</li>`).join('')}</ul>` : '';
+
+  document.getElementById('resultArea').innerHTML = `
+    <div class="result-card">
+      <div class="result-primary">
+        <div class="result-swatch" style="background:${p.hex}"></div>
+        <div>
+          <div class="result-name">${p.color}
+            <span class="result-badge ${badgeClass}">${res.matchType}</span>
+          </div>
+          <div class="result-score">★ Score: ${p.score}/100</div>
+        </div>
+      </div>
+      ${reasonsHtml}
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:8px">
+        Searched ${res.totalCombosSearched.toLocaleString()} combinations
+      </div>
+      ${altsHtml}
+    </div>`;
+}
+
+function applyAlt(color, hex) {
+  updateRow('outer', color, hex, false);
+  // Re-render alternatives section to highlight
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function showSkeleton() {
+  document.getElementById('colorGrid').innerHTML =
+    `<div style="display:contents">${Array(10).fill(
+      '<div class="skeleton" style="height:90px;border-radius:10px"></div>'
+    ).join('')}</div>`;
+}
+
+function renderChips(options) {
+  const grid = document.getElementById('colorGrid');
+  if (!options.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">🎨</div>No options found — try a different combination</div>`;
+    return;
+  }
+
+  const step = STEPS[currentStep];
+  const selected = state[step]?.color;
+
+  grid.innerHTML = options.map(opt => `
+    <div class="color-chip ${opt.color === selected ? 'selected' : ''}"
+         onclick="selectColor('${opt.color}','${opt.hex}',${opt.score},${opt.frequency})"
+         title="${opt.reasons ? opt.reasons.join(' · ') : ''}">
+      <div class="chip-swatch" style="background:${opt.hex}"></div>
+      <div class="chip-label">${opt.color}</div>
+      ${opt.score < 100 ? `<div class="chip-score">${opt.score}pts</div>` : ''}
+    </div>`).join('');
+}
+
+function updateRow(slot, color, hex, empty) {
+  const row = document.getElementById(`row-${slot}`);
+  document.getElementById(`swatch-${slot}`).style.background = hex;
+  document.getElementById(`val-${slot}`).textContent = color || '—';
+  row.classList.toggle('empty', empty || !color);
+}
+
+function updateStepPills() {
+  document.querySelectorAll('.step-pill').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    if (i < currentStep) el.classList.add('done');
+    else if (i === currentStep) el.classList.add('active');
+  });
+  document.getElementById('stepTitle').textContent = STEP_TITLES[Math.min(currentStep, 4)];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Selection logic
+// ─────────────────────────────────────────────────────────────────────────────
+async function selectColor(color, hex, score, freq) {
+  const step = STEPS[currentStep];
+  state[step] = { color, hex, score };
+  updateRow(step, color, hex, false);
+
+  // Re-render current chips to show selection
+  renderChips(await fetchOptions(step));   // lightweight re-fetch already cached by browser
+
+  // Advance
+  currentStep++;
+  updateStepPills();
+
+  if (currentStep < STEPS.length) {
+    showSkeleton();
+    const nextStep = STEPS[currentStep];
+    const opts = await fetchOptions(nextStep);
+    renderChips(opts);
+  } else {
+    // All 4 steps done — show predict button
+    document.getElementById('colorGrid').innerHTML =
+      `<div class="empty-state" style="grid-column:1/-1">
+        <div class="icon">✅</div>All garments selected! Click Predict below.</div>`;
+    document.getElementById('predictBtn').disabled = false;
+  }
+}
+
+async function loadStep(step) {
+  showSkeleton();
+  const opts = await fetchOptions(STEPS[step]);
+  renderChips(opts);
+}
+
+function resetAll() {
+  Object.keys(state).forEach(k => state[k] = null);
+  currentStep = 0;
+  document.getElementById('predictBtn').disabled = true;
+  document.getElementById('resultArea').innerHTML = '';
+  STEPS.forEach(s => updateRow(s, '', '#333', true));
+  updateRow('outer', '', '#333', true);
+  updateStepPills();
+  loadStep(0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────────────────────────────────────
+loadStep(0);
+</script>
+</body>
+</html>
