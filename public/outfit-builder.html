@@ -49,6 +49,33 @@
       font-size: 0.95rem;
     }
 
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .nav-tab {
+      padding: 8px 16px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface2);
+      transition: all 0.2s;
+    }
+    .nav-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124,106,255,0.1);
+    }
+    .nav-tab:hover:not(.active) {
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text);
+    }
+
     /* ── Layout ── */
     .layout {
       display: grid;
@@ -350,9 +377,10 @@
   <div class="header">
     <h1>✦ Outfit Color Builder</h1>
     <p>Pick each garment — we'll suggest the perfect layer combo in real time</p>
-    <div style="margin-top:12px;display:flex;justify-content:center;gap:10px">
-      <a href="/" style="font-size:0.78rem;color:#6b6b7a;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:4px 12px;border-radius:99px">Admin</a>
-      <a href="/db-explorer.html" style="font-size:0.78rem;color:#6b6b7a;text-decoration:none;border:1px solid rgba(255,255,255,0.08);padding:4px 12px;border-radius:99px">🗄 DB Explorer</a>
+    
+    <div class="nav-tabs">
+      <a href="/outfit-builder.html" class="nav-tab active">Sequential Mode</a>
+      <a href="/any-sequence-builder.html" class="nav-tab">Any-Sequence Mode</a>
     </div>
   </div>
 
@@ -369,6 +397,35 @@
     </div>
 
     <div class="card">
+      <!-- Premium Context Filters -->
+      <div class="filter-controls" style="display: flex; gap: 12px; margin-bottom: 20px; background: var(--surface2); padding: 14px; border-radius: var(--radius); border: 1px solid var(--border);">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Occasion</label>
+          <select id="filterOccasion" onchange="triggerFilterReload()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; outline: none; cursor: pointer; transition: border-color 0.2s;">
+            <option value="any">Any Occasion</option>
+            <option value="formal">👔 Formal</option>
+            <option value="casual">☕ Casual</option>
+            <option value="athletic">👟 Athletic</option>
+          </select>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Outfit Vibe</label>
+          <select id="filterVibe" onchange="triggerFilterReload()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; outline: none; cursor: pointer; transition: border-color 0.2s;">
+            <option value="any">Any Vibe</option>
+            <option value="minimalist">🖤 Minimalist</option>
+            <option value="maximalist">🌈 Maximalist</option>
+          </select>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Fit Profile</label>
+          <select id="filterFit" onchange="triggerFilterReload()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; outline: none; cursor: pointer; transition: border-color 0.2s;">
+            <option value="any">Any Fit</option>
+            <option value="fitted">📐 Fitted / Blazer</option>
+            <option value="oversized">🥋 Oversized / Cozy</option>
+          </select>
+        </div>
+      </div>
+
       <div class="section-title" id="stepTitle">Choose your Top color</div>
       <div class="color-grid" id="colorGrid">
         <!-- skeleton on load -->
@@ -457,8 +514,17 @@ async function fetchOptions(step) {
   if (state.bottom)    params.set('bottomColor', state.bottom.color);
   if (state.outerwear) params.set('outerwearColor', state.outerwear.color);
 
+  // Parse active filters from UI dropdowns
+  const occasion = document.getElementById('filterOccasion')?.value || 'any';
+  const vibe = document.getElementById('filterVibe')?.value || 'any';
+  const fitType = document.getElementById('filterFit')?.value || 'any';
+
+  if (occasion !== 'any') params.set('occasion', occasion);
+  if (vibe !== 'any') params.set('vibe', vibe);
+  if (fitType !== 'any') params.set('fitType', fitType);
+
   const endpoints = {
-    top:       '/api/outfit/step/tops',
+    top:       '/api/outfit/step/tops?' + params,
     bottom:    '/api/outfit/step/bottom?' + params,
     outerwear: '/api/outfit/step/outerwear?' + params,
     footwear:  '/api/outfit/step/footwear?' + params,
@@ -490,6 +556,10 @@ async function doPrediction() {
       <div class="skeleton" style="height:40px"></div>
     </div></div>`;
 
+  const occasion = document.getElementById('filterOccasion')?.value || 'any';
+  const vibe = document.getElementById('filterVibe')?.value || 'any';
+  const fitType = document.getElementById('filterFit')?.value || 'any';
+
   const r = await fetch('/api/outfit/predict-outer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -498,6 +568,9 @@ async function doPrediction() {
       bottomColor:   state.bottom.color,
       outerwearColor: state.outerwear.color,
       footwearColor: state.footwear.color,
+      occasion: occasion !== 'any' ? occasion : undefined,
+      vibe: vibe !== 'any' ? vibe : undefined,
+      fitType: fitType !== 'any' ? fitType : undefined
     }),
   });
   const d = await r.json();
@@ -511,25 +584,36 @@ async function doPrediction() {
   const p = res.primary;
 
   // Update summary row
-  updateRow('outer', p.color, p.hex, false);
+  updateRow('outer', p.color, p.hex, false, p.patternUrl);
 
   const badgeClass = `badge-${res.matchType}`;
   const altsHtml = res.alternatives.length
     ? `<div class="alts-title">Alternatives</div>
        <div class="alts-row">${res.alternatives.map(a =>
-         `<div class="alt-chip" onclick="applyAlt('${a.color}','${a.hex}')">
-            <div class="alt-swatch" style="background:${a.hex}"></div>
+         `<div class="alt-chip ${a.isFlagged ? 'flagged' : ''}" style="${a.isFlagged ? 'opacity:0.55;border:1px dashed #ef4444' : ''} ${a.patternUrl ? 'border: 1px solid var(--accent)' : ''}" onclick="applyAlt('${a.color}','${a.hex}','${a.patternUrl || ''}')">
+            <div class="alt-swatch" style="${a.patternUrl ? `background-image:url('${a.patternUrl}');background-size:cover` : `background:${a.hex}`}"></div>
             <span>${a.color}</span>
-            <span style="color:var(--muted);font-size:0.68rem">${a.score}</span>
+            <span style="color:var(--muted);font-size:0.68rem">${a.isFlagged ? 'Flagged' : a.score}</span>
           </div>`).join('')}</div>` : '';
 
   const reasonsHtml = p.reasons.length
     ? `<ul class="reasons-list">${p.reasons.map(r => `<li>${r}</li>`).join('')}</ul>` : '';
 
+  const actionButtonsHtml = `
+    <div class="internal-action-section" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <button class="btn" id="saveOutfitBtn" style="background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); font-size: 0.72rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="saveCurrentOutfit('${state.top.color}', '${state.bottom.color}', '${state.outerwear.color}', '${state.footwear.color}', '${p.color}')">
+        💾 Save Outfit (Feedback Loop)
+      </button>
+      <button class="btn btn-secondary" style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); font-size: 0.72rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="flagCurrentOutfit('${state.top.color}', '${state.bottom.color}', '${state.outerwear.color}', '${state.footwear.color}', '${p.color}')">
+        🚨 Flag Combination as Bad
+      </button>
+    </div>
+  `;
+
   document.getElementById('resultArea').innerHTML = `
     <div class="result-card">
       <div class="result-primary">
-        <div class="result-swatch" style="background:${p.hex}"></div>
+        <div class="result-swatch" style="${p.patternUrl ? `background-image:url('${p.patternUrl}');background-size:cover` : `background:${p.hex}`}"></div>
         <div>
           <div class="result-name">${p.color}
             <span class="result-badge ${badgeClass}">${res.matchType}</span>
@@ -538,6 +622,7 @@ async function doPrediction() {
         </div>
       </div>
       ${reasonsHtml}
+      ${actionButtonsHtml}
       <div style="font-size:0.72rem;color:var(--muted);margin-top:8px">
         Searched ${res.totalCombosSearched.toLocaleString()} combinations
       </div>
@@ -545,9 +630,8 @@ async function doPrediction() {
     </div>`;
 }
 
-function applyAlt(color, hex) {
-  updateRow('outer', color, hex, false);
-  // Re-render alternatives section to highlight
+function applyAlt(color, hex, patternUrl) {
+  updateRow('outer', color, hex, false, patternUrl);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -571,19 +655,54 @@ function renderChips(options) {
   const step = STEPS[currentStep];
   const selected = state[step]?.color;
 
-  grid.innerHTML = options.map(opt => `
+  const normalOptions = options.filter(o => !o.isFlagged);
+  const flaggedOptions = options.filter(o => o.isFlagged);
+
+  let html = normalOptions.map(opt => `
     <div class="color-chip ${opt.color === selected ? 'selected' : ''}"
-         onclick="selectColor('${opt.color}','${opt.hex}',${opt.score},${opt.frequency})"
-         title="${opt.reasons ? opt.reasons.join(' · ') : ''}">
-      <div class="chip-swatch" style="background:${opt.hex}"></div>
-      <div class="chip-label">${opt.color}</div>
-      ${opt.score < 100 ? `<div class="chip-score">${opt.score}pts</div>` : ''}
+         onclick="selectColor('${opt.color}','${opt.hex}',${opt.score},${opt.frequency},'${opt.patternUrl || ''}')"
+         title="${opt.reasons ? opt.reasons.join(' · ') : ''}"
+         style="height: auto; padding-bottom: 12px;">
+      <div class="chip-swatch" style="${opt.patternUrl ? `background-image:url('${opt.patternUrl}');background-size:cover` : `background:${opt.hex}`}"></div>
+      <div class="chip-label" style="font-weight:600;">${opt.color}</div>
+      ${opt.occasions && opt.occasions.length > 0 ? `<div style="font-size:0.55rem; color:var(--muted); text-transform:uppercase; margin-top:2px;">${opt.occasions.join(' · ')}</div>` : ''}
+      <div class="chip-score" style="position:static; margin-top:6px; font-size:0.6rem; color:var(--accent); background:none; padding:0; font-weight:600; width:100%; text-align:center; white-space:normal; line-height:1.2;">
+        ${opt.explanation || `${opt.score}pts`}
+      </div>
     </div>`).join('');
+
+  if (flaggedOptions.length > 0) {
+    html += `
+      <div class="flagged-banner-container" style="grid-column: 1 / -1; margin: 24px 0 12px 0;">
+        <div class="flagged-banner" style="background: rgba(239, 68, 68, 0.12); border-left: 4px solid #ef4444; padding: 12px; border-radius: 6px; color: #f87171; font-size: 0.8rem; font-weight: 500;">
+          ⚠️ Less Matched Combinations (Style Team Flagged: Will not look good on you)
+        </div>
+      </div>
+      ${flaggedOptions.map(opt => `
+        <div class="color-chip flagged ${opt.color === selected ? 'selected' : ''}"
+             style="opacity: 0.65; border: 1px dashed rgba(239, 68, 68, 0.5); height: auto; padding-bottom: 12px;"
+             onclick="selectColor('${opt.color}','${opt.hex}',${opt.score},${opt.frequency},'${opt.patternUrl || ''}')"
+             title="${opt.reasons ? opt.reasons.join(' · ') : ''}">
+          <div class="chip-swatch" style="${opt.patternUrl ? `background-image:url('${opt.patternUrl}');background-size:cover` : `background:${opt.hex}`}"></div>
+          <div class="chip-label" style="font-weight:600;">${opt.color}</div>
+          <div class="chip-score" style="background: #ef4444; color: white; position: static; margin-top: 6px; width: 100%; border-radius: 4px; padding: 2px 0; font-size: 0.6rem;">Flagged</div>
+        </div>`).join('')}
+    `;
+  }
+
+  grid.innerHTML = html;
 }
 
-function updateRow(slot, color, hex, empty) {
+function updateRow(slot, color, hex, empty, patternUrl) {
   const row = document.getElementById(`row-${slot}`);
-  document.getElementById(`swatch-${slot}`).style.background = hex;
+  const swatch = document.getElementById(`swatch-${slot}`);
+  if (patternUrl) {
+    swatch.style.backgroundImage = `url('${patternUrl}')`;
+    swatch.style.backgroundSize = 'cover';
+  } else {
+    swatch.style.backgroundImage = 'none';
+    swatch.style.background = hex || '#333';
+  }
   document.getElementById(`val-${slot}`).textContent = color || '—';
   row.classList.toggle('empty', empty || !color);
 }
@@ -600,10 +719,10 @@ function updateStepPills() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Selection logic
 // ─────────────────────────────────────────────────────────────────────────────
-async function selectColor(color, hex, score, freq) {
+async function selectColor(color, hex, score, freq, patternUrl) {
   const step = STEPS[currentStep];
-  state[step] = { color, hex, score };
-  updateRow(step, color, hex, false);
+  state[step] = { color, hex, score, patternUrl };
+  updateRow(step, color, hex, false, patternUrl);
 
   // Re-render current chips to show selection
   renderChips(await fetchOptions(step));   // lightweight re-fetch already cached by browser
@@ -635,12 +754,101 @@ async function loadStep(step) {
 function resetAll() {
   Object.keys(state).forEach(k => state[k] = null);
   currentStep = 0;
+  
+  // Reset filter dropdowns
+  const oSel = document.getElementById('filterOccasion');
+  const vSel = document.getElementById('filterVibe');
+  const fSel = document.getElementById('filterFit');
+  if (oSel) oSel.value = 'any';
+  if (vSel) vSel.value = 'any';
+  if (fSel) fSel.value = 'any';
+
   document.getElementById('predictBtn').disabled = true;
   document.getElementById('resultArea').innerHTML = '';
   STEPS.forEach(s => updateRow(s, '', '#333', true));
   updateRow('outer', '', '#333', true);
   updateStepPills();
   loadStep(0);
+}
+
+async function triggerFilterReload() {
+  if (currentStep < STEPS.length) {
+    showSkeleton();
+    const step = STEPS[currentStep];
+    const opts = await fetchOptions(step);
+    renderChips(opts);
+  }
+}
+
+async function flagCurrentOutfit(topColor, bottomColor, outerwearColor, footwearColor, topOuterColor) {
+  const reason = prompt("Enter internal reason for flagging this combination as bad (e.g. 'Red top under burgundy jacket clashes too heavily'):");
+  if (reason === null) return;
+
+  try {
+    const res = await fetch('/api/outfit/flag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topColor,
+        bottomColor,
+        outerwearColor,
+        footwearColor,
+        topOuterColor,
+        reason: reason || 'Flagged during internal testing'
+      })
+    });
+    const d = await res.json();
+    if (d.success) {
+      alert(`Successfully flagged this combination! It will now be marked as flagged and shown under 'Less Matched' banner.`);
+      doPrediction(); // fixed reference from predictOutfit()
+    } else {
+      alert(`Failed to flag: ${d.error}`);
+    }
+  } catch (err) {
+    alert(`Error: ${err}`);
+  }
+}
+
+async function saveCurrentOutfit(topColor, bottomColor, outerwearColor, footwearColor, topOuterColor) {
+  try {
+    const btn = document.getElementById('saveOutfitBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = '💾 Saving...';
+    }
+    const res = await fetch('/api/outfit/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topColor,
+        bottomColor,
+        outerwearColor,
+        footwearColor,
+        topOuterColor,
+        interactionScore: 2
+      })
+    });
+    const d = await res.json();
+    if (d.success) {
+      alert(`🎉 Outfit Saved Successfully!\nThis combination has been logged into the machine learning clicks database (data/training_clicks.csv).\nThe model will use this feedback in future training runs!`);
+      if (btn) {
+        btn.innerText = '💾 Saved! (Retraining Running)';
+      }
+    } else {
+      alert(`Failed to save: ${d.error}`);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = '💾 Save Outfit (Feedback Loop)';
+      }
+    }
+  } catch (err) {
+    alert(`Error: ${err}`);
+    const btn = document.getElementById('saveOutfitBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = '💾 Save Outfit (Feedback Loop)';
+    }
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,21 @@
+# Twelve70 ML pipeline — pinned to the versions validated in the audit (Jul 2026).
+# Install into a virtualenv: pip install -r requirements.txt
+
+# Core ML
+lightgbm==4.6.0
+xgboost==3.2.0
+scikit-learn==1.8.0
+optuna==4.9.0
+
+# Data
+pandas==3.0.3
+numpy==2.4.6
+
+# Model export (Node.js ONNX runtime consumption)
+onnx==1.21.0
+onnxmltools==1.16.0
+skl2onnx==1.20.0
+
+# Reporting / plots
+matplotlib==3.10.9
+seaborn==0.13.2

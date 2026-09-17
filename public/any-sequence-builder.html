@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>twelve70 — Any-Sequence Outfit Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #16161a;
+      --surface2: #1e1e24;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8e8ec;
+      --muted: #6b6b7a;
+      --accent: #7c6aff;
+      --accent2: #ff6ab0;
+      --green: #22c55e;
+      --radius: 14px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    /* ── Header & Navigation ── */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .nav-tab {
+      padding: 8px 16px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface2);
+      transition: all 0.2s;
+    }
+    .nav-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124,106,255,0.1);
+    }
+    .nav-tab:hover:not(.active) {
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text);
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Garment Selectors ── */
+    .garment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .garment-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .garment-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .garment-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(124,106,255,0.25);
+    }
+
+    .garment-swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: #333;
+    }
+    .garment-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .garment-val {
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .garment-reset {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: none;
+      color: var(--muted);
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .garment-reset:hover {
+      background: rgba(239,68,68,0.15);
+      color: #ef4444;
+    }
+
+    /* ── Section Title ── */
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Color Options Chips ── */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      min-height: 80px;
+    }
+
+    .color-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 10px 6px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background: var(--surface2);
+      transition: all 0.18s ease;
+      position: relative;
+    }
+    .color-chip:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .color-chip.selected {
+      border-color: var(--accent);
+      background: rgba(124,106,255,0.12);
+    }
+
+    .chip-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .chip-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .chip-score {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ── Loading Skeleton ── */
+    .skeleton-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+    }
+    .skeleton {
+      height: 90px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--surface2) 25%, rgba(255,255,255,0.04) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Right Panel styling ── */
+    .reasons-box {
+      margin-top: 16px;
+    }
+    .reasons-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .reasons-list {
+      list-style: none;
+    }
+    .reasons-list li {
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding: 5px 0;
+      padding-left: 14px;
+      position: relative;
+    }
+    .reasons-list li::before {
+      content: '✦';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.65rem;
+    }
+
+    .reset-all-btn {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 20px;
+    }
+    .reset-all-btn:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>✦ Outfit Color Builder</h1>
+    <p>Construct your outfit in any sequence — colors and scores calculate dynamically</p>
+    
+    <div class="nav-tabs">
+      <a href="/outfit-builder.html" class="nav-tab">Sequential Mode</a>
+      <a href="/any-sequence-builder.html" class="nav-tab active">Any-Sequence Mode</a>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: Garment Cards & Active Selections -->
+    <div>
+      <div class="garment-grid">
+        <!-- Card 1: Top -->
+        <div class="garment-card active" id="card-topColor" onclick="setActiveSlot('topColor')">
+          <div class="garment-swatch" id="swatch-topColor" style="background:#333"></div>
+          <div class="garment-label">Top</div>
+          <div class="garment-val" id="val-topColor">—</div>
+          <button class="garment-reset" onclick="resetSlot('topColor', event)">×</button>
+        </div>
+
+        <!-- Card 2: Bottom -->
+        <div class="garment-card" id="card-bottomColor" onclick="setActiveSlot('bottomColor')">
+          <div class="garment-swatch" id="swatch-bottomColor" style="background:#333"></div>
+          <div class="garment-label">Bottom</div>
+          <div class="garment-val" id="val-bottomColor">—</div>
+          <button class="garment-reset" onclick="resetSlot('bottomColor', event)">×</button>
+        </div>
+
+        <!-- Card 3: Outerwear -->
+        <div class="garment-card" id="card-outerwearColor" onclick="setActiveSlot('outerwearColor')">
+          <div class="garment-swatch" id="swatch-outerwearColor" style="background:#333"></div>
+          <div class="garment-label">Outerwear</div>
+          <div class="garment-val" id="val-outerwearColor">—</div>
+          <button class="garment-reset" onclick="resetSlot('outerwearColor', event)">×</button>
+        </div>
+
+        <!-- Card 4: Footwear -->
+        <div class="garment-card" id="card-footwearColor" onclick="setActiveSlot('footwearColor')">
+          <div class="garment-swatch" id="swatch-footwearColor" style="background:#333"></div>
+          <div class="garment-label">Footwear</div>
+          <div class="garment-val" id="val-footwearColor">—</div>
+          <button class="garment-reset" onclick="resetSlot('footwearColor', event)">×</button>
+        </div>
+
+        <!-- Card 5: Top Outer -->
+        <div class="garment-card" id="card-topOuterColor" onclick="setActiveSlot('topOuterColor')">
+          <div class="garment-swatch" id="swatch-topOuterColor" style="background:#333"></div>
+          <div class="garment-label">Top Outer</div>
+          <div class="garment-val" id="val-topOuterColor">—</div>
+          <button class="garment-reset" onclick="resetSlot('topOuterColor', event)">×</button>
+        </div>
+      </div>
+
+      <!-- Color suggestions for active slot -->
+      <div class="card">
+        <!-- Premium Context Filters -->
+        <div class="filter-controls" style="display: flex; gap: 12px; margin-bottom: 20px; background: var(--surface2); padding: 14px; border-radius: var(--radius); border: 1px solid var(--border);">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Occasion</label>
+            <select id="filterOccasion" onchange="updateMatchingOptions()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; outline: none; cursor: pointer; transition: border-color 0.2s;">
+              <option value="any">Any Occasion</option>
+              <option value="formal">👔 Formal</option>
+              <option value="casual">☕ Casual</option>
+              <option value="athletic">👟 Athletic</option>
+            </select>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Outfit Vibe</label>
+            <select id="filterVibe" onchange="updateMatchingOptions()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; outline: none; cursor: pointer; transition: border-color 0.2s;">
+              <option value="any">Any Vibe</option>
+              <option value="minimalist">🖤 Minimalist</option>
+              <option value="maximalist">🌈 Maximalist</option>
+            </select>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em;">Fit Profile</label>
+            <select id="filterFit" onchange="updateMatchingOptions()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 500; outline: none; cursor: pointer; transition: border-color 0.2s;">
+              <option value="any">Any Fit</option>
+              <option value="fitted">📐 Fitted / Blazer</option>
+              <option value="oversized">🥋 Oversized / Cozy</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title" id="gridTitle">Select Top color</div>
+        <div class="color-grid" id="colorGrid">
+          <!-- Skeleton loaders -->
+          <div class="skeleton-grid" id="skeleton" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Styling Summary & Rationales -->
+    <div class="summary-panel">
+      <div class="card">
+        <div class="section-title">Outfit Styling Rationale</div>
+        
+        <div id="rationalesContainer">
+          <div class="empty-state">
+            <div class="icon">💡</div>
+            Select any clothing colors to see active styling recommendations and details.
+          </div>
+        </div>
+
+        <button class="reset-all-btn" onclick="resetAll()">↺ Reset entire outfit</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────────
+    // State Management
+    // ─────────────────────────────────────────────────────────────────────────────
+    const state = {
+      selections: {
+        topColor: null,
+        bottomColor: null,
+        outerwearColor: null,
+        footwearColor: null,
+        topOuterColor: null
+      },
+      options: {} // stores options retrieved from API
+    };
+
+    let activeSlot = 'topColor';
+    const SLOT_TITLES = {
+      topColor: 'Select Top color',
+      bottomColor: 'Select Bottom color',
+      outerwearColor: 'Select Outerwear color',
+      footwearColor: 'Select Footwear color',
+      topOuterColor: 'Select Top Outer layer color'
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // API & Data Integration
+    // ─────────────────────────────────────────────────────────────────────────────
+    async function updateMatchingOptions() {
+      showSkeleton();
+
+      const payload = { selections: {} };
+      for (const [key, val] of Object.entries(state.selections)) {
+        if (val) payload.selections[key] = val.color;
+      }
+
+      // Add active dropdown filters
+      const occasion = document.getElementById('filterOccasion')?.value || 'any';
+      const vibe = document.getElementById('filterVibe')?.value || 'any';
+      const fitType = document.getElementById('filterFit')?.value || 'any';
+
+      if (occasion !== 'any') payload.occasion = occasion;
+      if (vibe !== 'any') payload.vibe = vibe;
+      if (fitType !== 'any') payload.fitType = fitType;
+
+      try {
+        const response = await fetch('/api/any-sequence/options', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        
+        if (!data.success) throw new Error(data.error || 'Server error');
+        
+        state.options = data.options;
+        renderActiveChips();
+        renderStylingRationales();
+      } catch (err) {
+        console.error('Failed to fetch Any-Sequence options:', err);
+        document.getElementById('colorGrid').innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1">
+            <div class="icon">⚠️</div>
+            Could not fetch styling options. Make sure the server is listening.<br>
+            <small style="margin-top:6px;display:block">Error: ${err.message}</small>
+          </div>
+        `;
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // UI Rendering
+    // ─────────────────────────────────────────────────────────────────────────────
+    function showSkeleton() {
+      document.getElementById('colorGrid').innerHTML = Array(10).fill(
+        '<div class="skeleton" style="height:90px;border-radius:10px"></div>'
+      ).join('');
+    }
+
+    function setActiveSlot(slot) {
+      activeSlot = slot;
+      
+      // Update visual active classes on cards
+      document.querySelectorAll('.garment-card').forEach(el => {
+        el.classList.toggle('active', el.id === `card-${slot}`);
+      });
+
+      document.getElementById('gridTitle').textContent = SLOT_TITLES[slot];
+      renderActiveChips();
+    }
+
+    function renderActiveChips() {
+      const grid = document.getElementById('colorGrid');
+      const list = state.options[activeSlot] || [];
+
+      if (!list.length) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1">
+            <div class="icon">🎨</div>
+            No color suggestions found for this category.
+          </div>
+        `;
+        return;
+      }
+
+      const selectedColor = state.selections[activeSlot]?.color;
+
+      const normalOptions = list.filter(o => !o.isFlagged);
+      const flaggedOptions = list.filter(o => o.isFlagged);
+
+      let html = normalOptions.map(opt => `
+        <div class="color-chip ${opt.color === selectedColor ? 'selected' : ''}"
+             onclick="selectColor('${opt.color}', '${opt.hex}', '${opt.patternUrl || ''}')"
+             title="${opt.reasons ? opt.reasons.join(' · ') : ''}"
+             style="height: auto; padding-bottom: 12px;">
+          <div class="chip-swatch" style="${opt.patternUrl ? `background-image:url('${opt.patternUrl}');background-size:cover` : `background:${opt.hex}`}"></div>
+          <div class="chip-label" style="font-weight:600;">${opt.color}</div>
+          ${opt.occasions && opt.occasions.length > 0 ? `<div style="font-size:0.55rem; color:var(--muted); text-transform:uppercase; margin-top:2px;">${opt.occasions.join(' · ')}</div>` : ''}
+          <div class="chip-score" style="position:static; margin-top:6px; font-size:0.6rem; color:var(--accent); background:none; padding:0; font-weight:600; width:100%; text-align:center; white-space:normal; line-height:1.2;">
+            ${opt.explanation || `${opt.score}pts`}
+          </div>
+        </div>
+      `).join('');
+
+      if (flaggedOptions.length > 0) {
+        html += `
+          <div class="flagged-banner-container" style="grid-column: 1 / -1; margin: 24px 0 12px 0; width: 100%;">
+            <div class="flagged-banner" style="background: rgba(239, 68, 68, 0.12); border-left: 4px solid #ef4444; padding: 12px; border-radius: 6px; color: #f87171; font-size: 0.8rem; font-weight: 500; text-align: left;">
+              ⚠️ Less Matched Combinations (Style Team Flagged: Will not look good on you)
+            </div>
+          </div>
+          ${flaggedOptions.map(opt => `
+            <div class="color-chip flagged ${opt.color === selectedColor ? 'selected' : ''}"
+                 style="opacity: 0.65; border: 1px dashed rgba(239, 68, 68, 0.5); height: auto; padding-bottom: 12px;"
+                 onclick="selectColor('${opt.color}', '${opt.hex}', '${opt.patternUrl || ''}')"
+                 title="${opt.reasons ? opt.reasons.join(' · ') : ''}">
+              <div class="chip-swatch" style="${opt.patternUrl ? `background-image:url('${opt.patternUrl}');background-size:cover` : `background:${opt.hex}`}"></div>
+              <div class="chip-label" style="font-weight:600;">${opt.color}</div>
+              <div class="chip-score" style="background: #ef4444; color: white; position: static; margin-top: 6px; width: 100%; border-radius: 4px; padding: 2px 0; font-size: 0.6rem;">Flagged</div>
+            </div>`).join('')}
+        `;
+      }
+
+      grid.innerHTML = html;
+    }
+
+    function selectColor(color, hex, patternUrl) {
+      state.selections[activeSlot] = { color, hex, patternUrl };
+      
+      // Update UI row elements
+      const swatch = document.getElementById(`swatch-${activeSlot}`);
+      if (patternUrl) {
+        swatch.style.backgroundImage = `url('${patternUrl}')`;
+        swatch.style.backgroundSize = 'cover';
+        swatch.style.backgroundPosition = 'center';
+      } else {
+        swatch.style.backgroundImage = 'none';
+        swatch.style.background = hex;
+      }
+      document.getElementById(`val-${activeSlot}`).textContent = color;
+      document.getElementById(`card-${activeSlot}`).classList.add('done');
+
+      // Update options and rationales
+      updateMatchingOptions();
+    }
+
+    function resetSlot(slot, event) {
+      if (event) event.stopPropagation(); // prevent card clicking
+
+      state.selections[slot] = null;
+      const swatch = document.getElementById(`swatch-${slot}`);
+      swatch.style.backgroundImage = 'none';
+      swatch.style.background = '#333';
+      document.getElementById(`val-${slot}`).textContent = '—';
+      document.getElementById(`card-${slot}`).classList.remove('done');
+
+      updateMatchingOptions();
+    }
+
+    function renderStylingRationales() {
+      const container = document.getElementById('rationalesContainer');
+      const hasSelections = Object.values(state.selections).some(Boolean);
+
+      if (!hasSelections) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">💡</div>
+            Select any clothing colors to see active styling recommendations and details.
+          </div>
+        `;
+        return;
+      }
+
+      // Gather reasons from all currently selected items
+      const selectedSlots = Object.keys(state.selections).filter(k => state.selections[k]);
+      let combinedReasons = [];
+
+      for (const slot of selectedSlots) {
+        const colorName = state.selections[slot].color;
+        // Search through the options of this slot to find matching reasons
+        const colorOption = (state.options[slot] || []).find(o => o.color === colorName);
+        if (colorOption && colorOption.reasons) {
+          combinedReasons.push(...colorOption.reasons);
+        }
+      }
+
+      // Filter duplicates
+      const uniqueReasons = Array.from(new Set(combinedReasons)).slice(0, 8);
+
+      let htmlContent = '';
+      if (uniqueReasons.length === 0) {
+        htmlContent = `
+          <div class="reasons-box">
+            <div class="reasons-title">Active Styling Rule</div>
+            <ul class="reasons-list">
+              <li>Excellent selection! Tones and coordinates match existing catalogs perfectly.</li>
+            </ul>
+          </div>
+        `;
+      } else {
+        htmlContent = `
+          <div class="reasons-box">
+            <div class="reasons-title">Active Styling Rules</div>
+            <ul class="reasons-list">
+              ${uniqueReasons.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      // Append Save Outfit and Flag Outfit Buttons
+      const isAllSelected = state.selections.topColor && state.selections.bottomColor && state.selections.outerwearColor && state.selections.footwearColor && state.selections.topOuterColor;
+      let saveBtnHtml = '';
+      if (isAllSelected) {
+        saveBtnHtml = `
+          <button class="btn" id="saveAnySequenceOutfitBtn" style="background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); font-size: 0.72rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="saveCurrentAnySequenceOutfit()">
+            💾 Save Outfit (Feedback Loop)
+          </button>
+        `;
+      }
+
+      htmlContent += `
+        <div class="internal-action-section" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          ${saveBtnHtml ? saveBtnHtml : '<div style="flex-grow:1"></div>'}
+          <button class="btn btn-secondary" style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); font-size: 0.72rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="flagCurrentAnySequenceOutfit()">
+            🚨 Flag Active Combo as Bad
+          </button>
+        </div>
+      `;
+
+      container.innerHTML = htmlContent;
+    }
+
+    function resetAll() {
+      // Reset filter dropdowns
+      const oSel = document.getElementById('filterOccasion');
+      const vSel = document.getElementById('filterVibe');
+      const fSel = document.getElementById('filterFit');
+      if (oSel) oSel.value = 'any';
+      if (vSel) vSel.value = 'any';
+      if (fSel) fSel.value = 'any';
+
+      for (const key of Object.keys(state.selections)) {
+        resetSlot(key);
+      }
+      setActiveSlot('topColor');
+    }
+
+    async function flagCurrentAnySequenceOutfit() {
+      const topColor = state.selections.topColor?.color || undefined;
+      const bottomColor = state.selections.bottomColor?.color || undefined;
+      const outerwearColor = state.selections.outerwearColor?.color || undefined;
+      const footwearColor = state.selections.footwearColor?.color || undefined;
+      const topOuterColor = state.selections.topOuterColor?.color || undefined;
+
+      const reason = prompt("Enter internal reason for flagging this combination as bad (e.g. 'Red top under burgundy jacket clashes too heavily'):");
+      if (reason === null) return;
+
+      try {
+        const res = await fetch('/api/outfit/flag', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topColor,
+            bottomColor,
+            outerwearColor,
+            footwearColor,
+            topOuterColor,
+            reason: reason || 'Flagged during internal testing'
+          })
+        });
+        const d = await res.json();
+        if (d.success) {
+          alert(`Successfully flagged this combination! It will now be marked as flagged and shown under 'Less Matched' banner.`);
+          updateMatchingOptions();
+        } else {
+          alert(`Failed to flag: ${d.error}`);
+        }
+      } catch (err) {
+        alert(`Error: ${err}`);
+      }
+    }
+
+    async function saveCurrentAnySequenceOutfit() {
+      const topColor = state.selections.topColor?.color || undefined;
+      const bottomColor = state.selections.bottomColor?.color || undefined;
+      const outerwearColor = state.selections.outerwearColor?.color || undefined;
+      const footwearColor = state.selections.footwearColor?.color || undefined;
+      const topOuterColor = state.selections.topOuterColor?.color || undefined;
+
+      try {
+        const btn = document.getElementById('saveAnySequenceOutfitBtn');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = '💾 Saving...';
+        }
+        const res = await fetch('/api/outfit/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topColor,
+            bottomColor,
+            outerwearColor,
+            footwearColor,
+            topOuterColor,
+            interactionScore: 2
+          })
+        });
+        const d = await res.json();
+        if (d.success) {
+          alert(`🎉 Outfit Saved Successfully!\nThis combination has been logged into the machine learning clicks database (data/training_clicks.csv).\nThe model will use this feedback in future training runs!`);
+          if (btn) {
+            btn.innerText = '💾 Saved! (Retraining Running)';
+          }
+        } else {
+          alert(`Failed to save: ${d.error}`);
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '💾 Save Outfit (Feedback Loop)';
+          }
+        }
+      } catch (err) {
+        alert(`Error: ${err}`);
+        const btn = document.getElementById('saveAnySequenceOutfitBtn');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '💾 Save Outfit (Feedback Loop)';
+        }
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Initialization
+    // ─────────────────────────────────────────────────────────────────────────────
+    updateMatchingOptions();
+  </script>
+</body>
+</html>

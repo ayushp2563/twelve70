@@ -11,7 +11,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "predict": "ts-node scripts/generate_predictions.ts"
+    "predict": "ts-node scripts/generate_predictions.ts",
+    "upload-predictions": "ts-node scripts/upload_predictions.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +21,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mysql2": "^3.22.3"
+    "mysql2": "^3.22.3",
+    "onnxruntime-node": "^1.26.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.4.1",
@@ -35,7 +37,11 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/src"],
-    "testMatch": ["**/tests/**/*.test.ts"]
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.ts"
+    ]
   }
 }

@@ -3,6 +3,30 @@ import path from 'path';
 import { pool } from '../config/database';
 import { matchTopOuterColor, OutfitInput } from '../colorMatcher';
 import { engine } from '../sequentialFilter';
+import { mlRanker } from '../ml/inference';
+import { flagger } from '../flaggingSystem';
+import { getInteractionStore } from '../db';
+import { retrainingScheduler } from '../ml/retrainingScheduler';
+import { profileRollupScheduler } from '../ml/profileRollupScheduler';
+import { UserProfile } from '../db/types';
+
+// Small TTL cache so predictions don't hit MySQL for the profile on every
+// request. Entries expire after 5 minutes; null is cached too (no history).
+const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000;
+const profileCache = new Map<string, { profile: UserProfile | null; expiresAt: number }>();
+
+async function getCachedUserProfile(userId: string): Promise<UserProfile | null> {
+  const cached = profileCache.get(userId);
+  if (cached && cached.expiresAt > Date.now()) return cached.profile;
+  try {
+    const profile = await getInteractionStore().getUserProfile(userId);
+    profileCache.set(userId, { profile, expiresAt: Date.now() + PROFILE_CACHE_TTL_MS });
+    return profile;
+  } catch {
+    // DB unavailable — predictions must still work without personalization
+    return null;
+  }
+}
 
 export function setupColorMatchingEndpoint(app: express.Application): void {
 
@@ -24,14 +48,15 @@ export function setupColorMatchingEndpoint(app: express.Application): void {
   });
 
   /**
-   * GET /api/outfit/step/bottom?topColor=black
+   * GET /api/outfit/step/bottom?topColor=black&occasion=formal&vibe=minimalist&fitType=fitted
    * Returns ranked bottom-colour options given the chosen top.
    */
   app.get('/api/outfit/step/bottom', (req: Request, res: Response) => {
-    const { topColor } = req.query as Record<string, string>;
+    const { topColor, occasion, vibe, fitType } = req.query as Record<string, string>;
     if (!topColor) return res.status(400).json({ success: false, error: 'topColor is required' });
     try {
-      const options = engine.getBottomOptions(topColor);
+      const filters = { occasion, vibe, fitType };
+      const options = engine.getBottomOptions(topColor, filters);
       res.json({ success: true, step: 'bottom', options });
     } catch (err) {
       res.status(500).json({ success: false, error: String(err) });
@@ -39,15 +64,16 @@ export function setupColorMatchingEndpoint(app: express.Application): void {
   });
 
   /**
-   * GET /api/outfit/step/outerwear?topColor=black&bottomColor=darkdenim
+   * GET /api/outfit/step/outerwear?topColor=black&bottomColor=darkdenim&occasion=formal
    * Returns ranked outerwear options given top + bottom.
    */
   app.get('/api/outfit/step/outerwear', (req: Request, res: Response) => {
-    const { topColor, bottomColor } = req.query as Record<string, string>;
+    const { topColor, bottomColor, occasion, vibe, fitType } = req.query as Record<string, string>;
     if (!topColor || !bottomColor)
       return res.status(400).json({ success: false, error: 'topColor and bottomColor are required' });
     try {
-      const options = engine.getOuterwearOptions(topColor, bottomColor);
+      const filters = { occasion, vibe, fitType };
+      const options = engine.getOuterwearOptions(topColor, bottomColor, filters);
       res.json({ success: true, step: 'outerwear', options });
     } catch (err) {
       res.status(500).json({ success: false, error: String(err) });
@@ -55,15 +81,16 @@ export function setupColorMatchingEndpoint(app: express.Application): void {
   });
 
   /**
-   * GET /api/outfit/step/footwear?topColor=black&bottomColor=darkdenim&outerwearColor=greycamo
+   * GET /api/outfit/step/footwear?topColor=black&bottomColor=darkdenim&outerwearColor=greycamo&occasion=casual
    * Returns ranked footwear options given top + bottom + outerwear.
    */
   app.get('/api/outfit/step/footwear', (req: Request, res: Response) => {
-    const { topColor, bottomColor, outerwearColor } = req.query as Record<string, string>;
+    const { topColor, bottomColor, outerwearColor, occasion, vibe, fitType } = req.query as Record<string, string>;
     if (!topColor || !bottomColor || !outerwearColor)
       return res.status(400).json({ success: false, error: 'topColor, bottomColor, outerwearColor are required' });
     try {
-      const options = engine.getFootwearOptions(topColor, bottomColor, outerwearColor);
+      const filters = { occasion, vibe, fitType };
+      const options = engine.getFootwearOptions(topColor, bottomColor, outerwearColor, filters);
       res.json({ success: true, step: 'footwear', options });
     } catch (err) {
       res.status(500).json({ success: false, error: String(err) });
@@ -72,16 +99,35 @@ export function setupColorMatchingEndpoint(app: express.Application): void {
 
   /**
    * POST /api/outfit/predict-outer
-   * Body: { topColor, bottomColor, outerwearColor, footwearColor }
+   * Body: { topColor, bottomColor, outerwearColor, footwearColor, occasion, vibe, fitType }
    * Returns predicted top_outer_color with alternatives and score breakdown.
    */
-  app.post('/api/outfit/predict-outer', (req: Request, res: Response) => {
-    const { topColor, bottomColor, outerwearColor, footwearColor } = req.body;
+  app.post('/api/outfit/predict-outer', async (req: Request, res: Response) => {
+    const { topColor, bottomColor, outerwearColor, footwearColor, occasion, vibe, fitType, userId } = req.body;
     if (!topColor || !bottomColor || !outerwearColor || !footwearColor)
       return res.status(400).json({ success: false, error: 'All four garment colors are required' });
     try {
       const startTime = Date.now();
-      const result = engine.predictTopOuter(topColor, bottomColor, outerwearColor, footwearColor);
+      const filters = { occasion, vibe, fitType };
+      const result = engine.predictTopOuter(topColor, bottomColor, outerwearColor, footwearColor, filters);
+
+      // Personalization context: the user's rolled-up color affinity profile
+      const profile = userId ? await getCachedUserProfile(userId) : null;
+
+      // Apply ML Re-Ranking
+      if (mlRanker.isEnabled()) {
+        const allCandidates = [result.primary, ...result.alternatives].filter(Boolean);
+        const reRanked = await mlRanker.reRankCandidates(
+          allCandidates,
+          { topColor, bottomColor, outerwearColor, footwearColor, userId, colorAffinity: profile?.colorAffinity },
+          'topOuterColor'
+        );
+        if (reRanked.length > 0) {
+          result.primary = reRanked[0];
+          result.alternatives = reRanked.slice(1);
+        }
+      }
+
       res.json({
         success: true,
         data: result,
@@ -156,6 +202,211 @@ export function setupColorMatchingEndpoint(app: express.Application): void {
       res.json({ success: true, data: colors });
     } catch {
       res.status(500).json({ success: false, error: 'Failed to fetch colors' });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // INTERNAL FLAGGING SYSTEM ROUTES
+  // ══════════════════════════════════════════════════════════════════════════
+
+  app.post('/api/outfit/flag', async (req: Request, res: Response) => {
+    try {
+      const { topColor, bottomColor, outerwearColor, footwearColor, topOuterColor, reason } = req.body;
+      const flagged = await flagger.addFlag({
+        topColor,
+        bottomColor,
+        outerwearColor,
+        footwearColor,
+        topOuterColor,
+        reason
+      });
+      res.json({ success: true, flagged });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  app.get('/api/outfit/flagged', async (_req: Request, res: Response) => {
+    try {
+      const flags = await flagger.getFlags();
+      res.json({ success: true, flags });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // FEEDBACK LOOP ROUTE (Saves to DB — retraining runs on cron schedule)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  app.post('/api/outfit/save', async (req: Request, res: Response) => {
+    const { userId, topColor, bottomColor, outerwearColor, footwearColor, topOuterColor, interactionScore, vibe, occasion, fitType, confidenceScore, modelVersion } = req.body;
+    if (!topColor || !bottomColor || !outerwearColor || !footwearColor || !topOuterColor) {
+      return res.status(400).json({ success: false, error: 'All garment colors are required' });
+    }
+
+    try {
+      const store = getInteractionStore();
+
+      // Normalize colors
+      const normTop = topColor.trim().toLowerCase();
+      const normBottom = bottomColor.trim().toLowerCase();
+      const normOuter = outerwearColor.trim().toLowerCase();
+      const normFoot = footwearColor.trim().toLowerCase();
+      const normTopOuter = topOuterColor.trim().toLowerCase();
+      const score = typeof interactionScore === 'number' ? interactionScore : 2;
+
+      // Save to database (retraining happens on scheduled cron, not per-save)
+      const saved = await store.saveInteraction({
+        userId: userId || 'anonymous',
+        action: 'save',
+        topColor: normTop,
+        bottomColor: normBottom,
+        outerwearColor: normOuter,
+        footwearColor: normFoot,
+        topOuterColor: normTopOuter,
+        interactionScore: score,
+        confidenceScore: confidenceScore ?? undefined,
+        modelVersion: modelVersion ?? undefined,
+        vibe: vibe ?? undefined,
+        occasion: occasion ?? undefined,
+        fitType: fitType ?? undefined,
+      });
+
+      console.log(`💾 Saved interaction #${saved.id} for user "${saved.userId}" -> ${normTopOuter}`);
+
+      res.json({ success: true, interactionId: saved.id, userId: saved.userId });
+    } catch (err) {
+      console.error('❌ Failed to save interaction:', err);
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // INTERACTION MONITORING ENDPOINTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/interactions/stats
+   * Returns summary statistics: total interactions, saves, flags, unique users.
+   */
+  app.get('/api/interactions/stats', async (_req: Request, res: Response) => {
+    try {
+      const store = getInteractionStore();
+      const stats = await store.getStats();
+      res.json({ success: true, stats });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  /**
+   * GET /api/interactions/user/:userId
+   * Returns all interactions for a specific user.
+   * Query params: ?limit=50
+   */
+  app.get('/api/interactions/user/:userId', async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId as string;
+      const limit = parseInt(req.query.limit as string, 10) || 100;
+      const store = getInteractionStore();
+      const interactions = await store.getInteractionsByUser(userId, limit);
+      res.json({ success: true, userId, count: interactions.length, interactions });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  /**
+   * GET /api/users/:userId/profile
+   * Returns the user's merged profile: color affinities, favorite colors,
+   * and context preferences (from monthly summaries + live interactions).
+   */
+  app.get('/api/users/:userId/profile', async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId as string;
+      const store = getInteractionStore();
+      const profile = await store.getUserProfile(userId);
+      if (!profile) {
+        return res.status(404).json({ success: false, error: `No history found for user: ${userId}` });
+      }
+      res.json({ success: true, profile });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  /**
+   * DELETE /api/interactions/user/:userId
+   * Deletes all interactions for a specific user (GDPR compliance).
+   */
+  app.delete('/api/interactions/user/:userId', async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId as string;
+      const store = getInteractionStore();
+      const deletedCount = await store.deleteUserInteractions(userId);
+      res.json({ success: true, userId, deletedCount });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // RETRAINING SCHEDULER ENDPOINTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/admin/retraining/status
+   * Returns scheduler status, config, and training run history.
+   */
+  console.log("REGISTERING STATUS ROUTE!!"); app.get('/api/admin/retraining/status', async (_req: Request, res: Response) => {
+    try {
+      const status = await retrainingScheduler.getStatus();
+      res.json({ success: true, ...status });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  /**
+   * POST /api/admin/retraining/trigger
+   * Manually trigger a retraining run (bypasses the min interaction check).
+   */
+  app.post('/api/admin/retraining/trigger', async (_req: Request, res: Response) => {
+    try {
+      const run = await retrainingScheduler.runTraining('manual');
+      res.json({ success: true, run });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PROFILE ROLLUP ENDPOINTS (summarize + archive + prune old interactions)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * GET /api/admin/rollup/status
+   * Returns the rollup scheduler config, state, and run history.
+   */
+  app.get('/api/admin/rollup/status', (_req: Request, res: Response) => {
+    try {
+      res.json({ success: true, ...profileRollupScheduler.getStatus() });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
+    }
+  });
+
+  /**
+   * POST /api/admin/rollup/trigger
+   * Manually run one rollup cycle (summarize, archive, prune old rows).
+   */
+  app.post('/api/admin/rollup/trigger', async (_req: Request, res: Response) => {
+    try {
+      const run = await profileRollupScheduler.runRollup('manual');
+      res.json({ success: true, run });
+    } catch (err) {
+      res.status(500).json({ success: false, error: String(err) });
     }
   });
 }

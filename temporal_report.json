@@ -1,0 +1,8 @@
+{
+  "training_period": "Pre-2024 (Val Split)",
+  "test_period": "2024+",
+  "train_accuracy": 0.99659,
+  "test_accuracy": 0.94955,
+  "performance_drop": "4.705%",
+  "conclusion": "Potential temporal decay"
+}

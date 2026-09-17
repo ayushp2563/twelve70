@@ -1,0 +1,132 @@
+{
+  "model_accuracy": 0.7503499300139972,
+  "feature_importances": [
+    {
+      "feature": "top_shoes_freq",
+      "importance": 0.23440641931691564
+    },
+    {
+      "feature": "top_bottom_freq",
+      "importance": 0.1588313679315925
+    },
+    {
+      "feature": "top_outerwear_freq",
+      "importance": 0.12492786929602571
+    },
+    {
+      "feature": "bottom_shoes_freq",
+      "importance": 0.11561623548407081
+    },
+    {
+      "feature": "bottom_outerwear_freq",
+      "importance": 0.09225900539680393
+    },
+    {
+      "feature": "outerwear_shoes_freq",
+      "importance": 0.03839762685673797
+    },
+    {
+      "feature": "top_pos_freq",
+      "importance": 0.03116079299607759
+    },
+    {
+      "feature": "top_midlayer_freq",
+      "importance": 0.02631225321303621
+    },
+    {
+      "feature": "bottom_pos_freq",
+      "importance": 0.024273522131540236
+    },
+    {
+      "feature": "shoes_midlayer_freq",
+      "importance": 0.02292949472922983
+    },
+    {
+      "feature": "shoes_pos_freq",
+      "importance": 0.02230494709756574
+    },
+    {
+      "feature": "bottom_midlayer_freq",
+      "importance": 0.02093263300338724
+    },
+    {
+      "feature": "outerwear_midlayer_freq",
+      "importance": 0.01639750340310047
+    },
+    {
+      "feature": "outerwear_pos_freq",
+      "importance": 0.014690211782336761
+    },
+    {
+      "feature": "top_lightness",
+      "importance": 0.011687425197244385
+    },
+    {
+      "feature": "top_family",
+      "importance": 0.0068873883649754886
+    },
+    {
+      "feature": "bottom_lightness",
+      "importance": 0.006700870530776536
+    },
+    {
+      "feature": "shoes_lightness",
+      "importance": 0.0063054987036370545
+    },
+    {
+      "feature": "shoes_family",
+      "importance": 0.005083060863246066
+    },
+    {
+      "feature": "outerwear_lightness",
+      "importance": 0.004781374473057238
+    },
+    {
+      "feature": "shoes_harmony_score",
+      "importance": 0.004375134373583937
+    },
+    {
+      "feature": "outerwear_family",
+      "importance": 0.0032763796171567747
+    },
+    {
+      "feature": "bottom_harmony_score",
+      "importance": 0.002102555841370708
+    },
+    {
+      "feature": "bottom_family",
+      "importance": 0.0019663853982131176
+    },
+    {
+      "feature": "outerwear_harmony_score",
+      "importance": 0.0015490175709073587
+    },
+    {
+      "feature": "top_harmony_score",
+      "importance": 0.0010565784226981426
+    },
+    {
+      "feature": "midlayer_pos_freq",
+      "importance": 0.0004547426411121819
+    },
+    {
+      "feature": "midlayer_family",
+      "importance": 0.00013665352456763492
+    },
+    {
+      "feature": "midlayer_lightness",
+      "importance": 0.00011686201530077427
+    },
+    {
+      "feature": "midlayer_harmony_score",
+      "importance": 8.018982373203643e-05
+    }
+  ],
+  "feature_groups_summary": {
+    "Lightness (0-1)": 0.0296,
+    "Color Family (Label Encoded)": 0.0173,
+    "Position Frequency": 0.0929,
+    "Pairwise Co-occurrence Frequency": 0.851,
+    "Color Family Harmony Score": 0.0092
+  }
+}

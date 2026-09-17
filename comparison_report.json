@@ -1,0 +1,35 @@
+{
+  "models": [
+    {
+      "name": "LightGBM",
+      "top_1_accuracy": 0.9962636776087537,
+      "top_5_accuracy": 0.9997331198291967,
+      "training_time_minutes": 0.09,
+      "inference_time_ms": 0.2,
+      "model_size_mb": 7.03,
+      "explainability": "High",
+      "winner": true
+    },
+    {
+      "name": "XGBoost",
+      "top_1_accuracy": 0.9957299172671471,
+      "top_5_accuracy": 0.9997331198291967,
+      "training_time_minutes": 0.04,
+      "inference_time_ms": 0.669,
+      "model_size_mb": 4.34,
+      "explainability": "High",
+      "winner": false
+    },
+    {
+      "name": "Random Forest",
+      "top_1_accuracy": 0.9759807846277022,
+      "top_5_accuracy": 0.9997331198291967,
+      "training_time_minutes": 0.02,
+      "inference_time_ms": 26.044,
+      "model_size_mb": 266.56,
+      "explainability": "Medium",
+      "winner": false
+    }
+  ],
+  "recommendation": "LightGBM: Best balance of accuracy, speed (<1.5ms CPU latency), and compact model size (<3MB) for Node.js production deployment."
+}

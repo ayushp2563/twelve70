@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-05-20 22:13:39",
+  "inputFile": "colorcombos.csv",
+  "outputFile": "colorcombos_with_predictions.csv",
+  "totalRows": 25211,
+  "rowsPredicted": 25098,
+  "rowsSkipped": 112,
+  "averageScore": 78,
+  "matchTypeBreakdown": {
+    "exact": 52,
+    "partial": 3464,
+    "scored": 21582,
+    "fallback": 0
+  },
+  "notes": [
+    "Predictions only filled where top_outer_color was \"-\" or empty.",
+    "Original file was not modified.",
+    "Score range: 0 (poor) → 100 (perfect match).",
+    "Confidence: high=exact DB match | medium=partial | low=family-scored | fallback=default."
+  ]
+}

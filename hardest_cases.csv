@@ -1,0 +1,14 @@
+Input_Colors,Actual_Color,Predicted_Color,Actual_Rank,Confidence
+Lightdenim/Lightdenim/Mint/White-Red,Burgundy,Black,2nd,0.998419243474818
+Brown/Camel/Offwhite/Brown,Black,Brown,2nd,0.9610294311107734
+Forestgreen/Greencamo/Khaki/Forestgreen,Forestgreen,Lightgrey,2nd,0.9569328625065108
+Sage/Sage/Brown/White,Black,Lightgrey,2nd,0.9370244202316547
+Warmgrey/Charcoal/Black/Warmgrey,Black,Lightgrey,2nd,0.8558697980820836
+Warmgrey/Charcoal/Black/Warmgrey,Black,Lightgrey,2nd,0.8558697980820836
+Forestgreen/White/Lightdenim/Brown,Brown,Black,2nd,0.8127401636106188
+Burgundy/Olivegreen/Dustypink/Brown,Brown,Black,2nd,0.744749533849623
+Lightgrey/White/Hotpink/Brown,Black,Brown,2nd,0.6413101197875722
+White/Charcoal/Slate/White,Slate,Black,2nd,0.6102619218225211
+Mediumdenim/Mediumdenim/Slate/Grey-Black,Mediumdenim,Lightgrey,2nd,0.6051645846111717
+Forestgreen/Olivegreen/Blackwatchtartan/Forestgreen,Lightgrey,Forestgreen,2nd,0.5407925584300157
+Black/Black/Blackwatchtartan/Black,Navy,Black,10th,0.5054979614923549

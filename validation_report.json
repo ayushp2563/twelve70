@@ -1,0 +1,985 @@
+{
+  "total_records": 25210,
+  "records_after_cleaning": 25003,
+  "removed_records": 207,
+  "issues_found": {
+    "null_values": 0,
+    "duplicates": 9,
+    "unknown_colors": 0,
+    "formatting_errors": 0,
+    "temporal_errors": 198
+  },
+  "color_distribution": {
+    "Black": {
+      "count": 7625,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Black-Grey": {
+      "count": 66,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Black-Greypolkadots": {
+      "count": 84,
+      "positions": [
+        "top"
+      ]
+    },
+    "Black-Turquoise": {
+      "count": 3,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Black-White": {
+      "count": 1,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Black-Whitegingham": {
+      "count": 1722,
+      "positions": [
+        "top"
+      ]
+    },
+    "Black-Whitehoundstooth": {
+      "count": 1015,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Black-Whitepolkadots": {
+      "count": 519,
+      "positions": [
+        "top"
+      ]
+    },
+    "Black-Yellowpolkadots": {
+      "count": 56,
+      "positions": [
+        "top"
+      ]
+    },
+    "Blackwatchtartan": {
+      "count": 1229,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Blue": {
+      "count": 499,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Blue-Whitegingham": {
+      "count": 220,
+      "positions": [
+        "top"
+      ]
+    },
+    "Bred": {
+      "count": 9,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Breds": {
+      "count": 1,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Brown": {
+      "count": 2921,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Burgundy": {
+      "count": 3046,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Burgundy-Whitegingham": {
+      "count": 372,
+      "positions": [
+        "top"
+      ]
+    },
+    "Burntorange": {
+      "count": 1603,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Camel": {
+      "count": 2118,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Charcoal": {
+      "count": 2968,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Charcoal-White": {
+      "count": 149,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Coast": {
+      "count": 9,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Coolgrey": {
+      "count": 4,
+      "positions": [
+        "top",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Coral": {
+      "count": 192,
+      "positions": [
+        "top",
+        "bottom"
+      ]
+    },
+    "Darkdenim": {
+      "count": 3718,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Deeppurple": {
+      "count": 352,
+      "positions": [
+        "top",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Dustypink": {
+      "count": 1066,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Forestgreen": {
+      "count": 6174,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Frenchblue": {
+      "count": 6,
+      "positions": [
+        "top",
+        "bottom"
+      ]
+    },
+    "Green": {
+      "count": 562,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Green-Blackbuffaloplaid": {
+      "count": 120,
+      "positions": [
+        "top"
+      ]
+    },
+    "Green-Whitegingham": {
+      "count": 80,
+      "positions": [
+        "top"
+      ]
+    },
+    "Green-Whitepolkadots": {
+      "count": 107,
+      "positions": [
+        "top"
+      ]
+    },
+    "Greencamo": {
+      "count": 1371,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Grey": {
+      "count": 42,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Grey-Black": {
+      "count": 1898,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Greycamo": {
+      "count": 1112,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Hotpink": {
+      "count": 549,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Indigo": {
+      "count": 703,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Khaki": {
+      "count": 4427,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Khaki-Brownhoundstooth": {
+      "count": 460,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Khaki-White": {
+      "count": 140,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Khakicamo": {
+      "count": 747,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Laserorange": {
+      "count": 11,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Lavender": {
+      "count": 91,
+      "positions": [
+        "top",
+        "bottom"
+      ]
+    },
+    "Lightblue": {
+      "count": 1553,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Lightblue-Whitegingham": {
+      "count": 293,
+      "positions": [
+        "top"
+      ]
+    },
+    "Lightblue-Whitestripe": {
+      "count": 654,
+      "positions": [
+        "top"
+      ]
+    },
+    "Lightdenim": {
+      "count": 3526,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Lightgrey": {
+      "count": 5084,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Lightgrey-Whitegingham": {
+      "count": 304,
+      "positions": [
+        "top"
+      ]
+    },
+    "Lightgrey-Whitestripe": {
+      "count": 7,
+      "positions": [
+        "top"
+      ]
+    },
+    "Lightpink": {
+      "count": 1642,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Lightpink-Whitegingham": {
+      "count": 115,
+      "positions": [
+        "top"
+      ]
+    },
+    "Lightpink-Whitestripe": {
+      "count": 384,
+      "positions": [
+        "top"
+      ]
+    },
+    "Lightyellow": {
+      "count": 497,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Mediumcurry": {
+      "count": 23,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Mediumdenim": {
+      "count": 2573,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Midnightblue": {
+      "count": 6,
+      "positions": [
+        "top",
+        "bottom"
+      ]
+    },
+    "Mint": {
+      "count": 255,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Mustard": {
+      "count": 1630,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Navy": {
+      "count": 4489,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Navy-Blackpolkadots": {
+      "count": 7,
+      "positions": [
+        "top"
+      ]
+    },
+    "Navy-Whitegingham": {
+      "count": 10,
+      "positions": [
+        "top"
+      ]
+    },
+    "Navy-Whitestripe": {
+      "count": 2,
+      "positions": [
+        "midlayer"
+      ]
+    },
+    "Offwhite": {
+      "count": 3854,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Olivegreen": {
+      "count": 3067,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Olivegreen-White": {
+      "count": 113,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Orange": {
+      "count": 1070,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Oxblood": {
+      "count": 353,
+      "positions": [
+        "top",
+        "bottom",
+        "shoes"
+      ]
+    },
+    "Photondust": {
+      "count": 23,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Purple": {
+      "count": 493,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Purple-Lavender-White": {
+      "count": 13,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Red": {
+      "count": 1228,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Red-Black": {
+      "count": 563,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Red-Blackbuffaloplaid": {
+      "count": 1,
+      "positions": [
+        "midlayer"
+      ]
+    },
+    "Redtartan": {
+      "count": 335,
+      "positions": [
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Royal-Black": {
+      "count": 693,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Royal-Blackbuffaloplaid": {
+      "count": 3,
+      "positions": [
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Royalblue": {
+      "count": 646,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Royals": {
+      "count": 60,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Rust": {
+      "count": 7,
+      "positions": [
+        "top",
+        "bottom"
+      ]
+    },
+    "Sage": {
+      "count": 7,
+      "positions": [
+        "top",
+        "bottom"
+      ]
+    },
+    "Sail": {
+      "count": 1559,
+      "positions": [
+        "top",
+        "shoes"
+      ]
+    },
+    "Sand": {
+      "count": 1854,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes"
+      ]
+    },
+    "Shadows": {
+      "count": 157,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Slate": {
+      "count": 383,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "St.Johns": {
+      "count": 7,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Syracuse": {
+      "count": 17,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Tan": {
+      "count": 2633,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "Taupe": {
+      "count": 3,
+      "positions": [
+        "outerwear",
+        "midlayer"
+      ]
+    },
+    "Teal": {
+      "count": 193,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear"
+      ]
+    },
+    "Tobacco": {
+      "count": 385,
+      "positions": [
+        "top",
+        "bottom",
+        "shoes"
+      ]
+    },
+    "Turquoise": {
+      "count": 1449,
+      "positions": [
+        "top",
+        "bottom",
+        "shoes"
+      ]
+    },
+    "Turquoise-White": {
+      "count": 1,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Vegtan": {
+      "count": 222,
+      "positions": [
+        "top",
+        "bottom",
+        "shoes"
+      ]
+    },
+    "Warmgrey": {
+      "count": 4,
+      "positions": [
+        "top",
+        "shoes"
+      ]
+    },
+    "White": {
+      "count": 4350,
+      "positions": [
+        "top",
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    },
+    "White-Hotpink": {
+      "count": 3,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "White-Khaki": {
+      "count": 152,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "White-Lightgrey": {
+      "count": 157,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "White-Offwhite": {
+      "count": 1,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "White-Orange": {
+      "count": 1,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "White-Red": {
+      "count": 3,
+      "positions": [
+        "shoes"
+      ]
+    },
+    "Yellow": {
+      "count": 838,
+      "positions": [
+        "bottom",
+        "outerwear",
+        "shoes",
+        "midlayer"
+      ]
+    }
+  },
+  "warnings": [
+    "Color 'Black' shows high seasonal concentration: 59.7% of occurrences are in Summer.",
+    "Color 'Black-Grey' appears 66 times but only in shoes position",
+    "Color 'Black-Grey' shows high seasonal concentration: 80.3% of occurrences are in Summer.",
+    "Color 'Black-Greypolkadots' appears 84 times but only in top position",
+    "Color 'Black-Greypolkadots' shows high seasonal concentration: 100.0% of occurrences are in Fall.",
+    "Color 'Black-Turquoise' is extremely rare, appearing only 3 times in the dataset.",
+    "Color 'Black-White' is extremely rare, appearing only 1 times in the dataset.",
+    "Color 'Black-Whitegingham' appears 1722 times but only in top position",
+    "Color 'Black-Whitegingham' shows high seasonal concentration: 85.8% of occurrences are in Fall.",
+    "Color 'Black-Whitehoundstooth' never appears in shoes position",
+    "Color 'Black-Whitehoundstooth' never appears in top position",
+    "Color 'Black-Whitehoundstooth' shows high seasonal concentration: 54.6% of occurrences are in Summer.",
+    "Color 'Black-Whitepolkadots' appears 519 times but only in top position",
+    "Color 'Black-Whitepolkadots' shows high seasonal concentration: 50.1% of occurrences are in Summer.",
+    "Color 'Black-Yellowpolkadots' appears 56 times but only in top position",
+    "Color 'Black-Yellowpolkadots' shows high seasonal concentration: 87.5% of occurrences are in Fall.",
+    "Color 'Blackwatchtartan' never appears in midlayer position",
+    "Color 'Blackwatchtartan' never appears in shoes position",
+    "Color 'Blackwatchtartan' shows high seasonal concentration: 52.7% of occurrences are in Fall.",
+    "Color 'Blue' never appears in midlayer position",
+    "Color 'Blue' shows high seasonal concentration: 72.9% of occurrences are in Fall.",
+    "Color 'Blue-Whitegingham' appears 220 times but only in top position",
+    "Color 'Blue-Whitegingham' shows high seasonal concentration: 55.0% of occurrences are in Fall.",
+    "Color 'Bred' is extremely rare, appearing only 9 times in the dataset.",
+    "Color 'Breds' is extremely rare, appearing only 1 times in the dataset.",
+    "Color 'Burgundy-Whitegingham' appears 372 times but only in top position",
+    "Color 'Burgundy-Whitegingham' shows high seasonal concentration: 61.6% of occurrences are in Fall.",
+    "Color 'Burntorange' never appears in midlayer position",
+    "Color 'Burntorange' never appears in shoes position",
+    "Color 'Burntorange' shows high seasonal concentration: 62.0% of occurrences are in Fall.",
+    "Color 'Charcoal-White' appears 149 times but only in shoes position",
+    "Color 'Charcoal-White' shows high seasonal concentration: 65.1% of occurrences are in Summer.",
+    "Color 'Coast' is extremely rare, appearing only 9 times in the dataset.",
+    "Color 'Coolgrey' is extremely rare, appearing only 4 times in the dataset.",
+    "Color 'Coral' never appears in midlayer position",
+    "Color 'Coral' never appears in outerwear position",
+    "Color 'Coral' never appears in shoes position",
+    "Color 'Darkdenim' never appears in shoes position",
+    "Color 'Darkdenim' shows high seasonal concentration: 46.7% of occurrences are in Fall.",
+    "Color 'Deeppurple' never appears in bottom position",
+    "Color 'Deeppurple' never appears in midlayer position",
+    "Color 'Dustypink' never appears in midlayer position",
+    "Color 'Dustypink' never appears in shoes position",
+    "Color 'Dustypink' shows high seasonal concentration: 66.2% of occurrences are in Fall.",
+    "Color 'Forestgreen' shows high seasonal concentration: 74.1% of occurrences are in Fall.",
+    "Color 'Frenchblue' is extremely rare, appearing only 6 times in the dataset.",
+    "Color 'Green' never appears in midlayer position",
+    "Color 'Green' shows high seasonal concentration: 52.8% of occurrences are in Fall.",
+    "Color 'Green-Blackbuffaloplaid' appears 120 times but only in top position",
+    "Color 'Green-Blackbuffaloplaid' shows high seasonal concentration: 55.8% of occurrences are in Fall.",
+    "Color 'Green-Whitegingham' appears 80 times but only in top position",
+    "Color 'Green-Whitegingham' shows high seasonal concentration: 87.5% of occurrences are in Fall.",
+    "Color 'Green-Whitepolkadots' appears 107 times but only in top position",
+    "Color 'Green-Whitepolkadots' shows high seasonal concentration: 86.9% of occurrences are in Fall.",
+    "Color 'Greencamo' never appears in midlayer position",
+    "Color 'Greencamo' never appears in shoes position",
+    "Color 'Greencamo' shows high seasonal concentration: 61.9% of occurrences are in Summer.",
+    "Color 'Grey' never appears in shoes position",
+    "Color 'Grey' shows high seasonal concentration: 100.0% of occurrences are in Spring.",
+    "Color 'Grey-Black' appears 1898 times but only in shoes position",
+    "Color 'Grey-Black' shows high seasonal concentration: 100.0% of occurrences are in Summer.",
+    "Color 'Greycamo' never appears in midlayer position",
+    "Color 'Greycamo' never appears in shoes position",
+    "Color 'Greycamo' shows high seasonal concentration: 64.4% of occurrences are in Summer.",
+    "Color 'Hotpink' never appears in midlayer position",
+    "Color 'Hotpink' shows high seasonal concentration: 55.9% of occurrences are in Fall.",
+    "Color 'Indigo' never appears in midlayer position",
+    "Color 'Indigo' shows high seasonal concentration: 60.3% of occurrences are in Fall.",
+    "Color 'Khaki' shows high seasonal concentration: 46.8% of occurrences are in Fall.",
+    "Color 'Khaki-Brownhoundstooth' never appears in shoes position",
+    "Color 'Khaki-Brownhoundstooth' never appears in top position",
+    "Color 'Khaki-Brownhoundstooth' shows high seasonal concentration: 47.6% of occurrences are in Summer.",
+    "Color 'Khaki-White' appears 140 times but only in shoes position",
+    "Color 'Khaki-White' shows high seasonal concentration: 62.9% of occurrences are in Summer.",
+    "Color 'Khakicamo' never appears in midlayer position",
+    "Color 'Khakicamo' never appears in shoes position",
+    "Color 'Khakicamo' shows high seasonal concentration: 51.9% of occurrences are in Summer.",
+    "Color 'Laserorange' appears 11 times but only in shoes position",
+    "Color 'Lavender' never appears in midlayer position",
+    "Color 'Lavender' never appears in outerwear position",
+    "Color 'Lavender' never appears in shoes position",
+    "Color 'Lavender' shows high seasonal concentration: 50.5% of occurrences are in Winter.",
+    "Color 'Lightblue' never appears in midlayer position",
+    "Color 'Lightblue-Whitegingham' appears 293 times but only in top position",
+    "Color 'Lightblue-Whitegingham' shows high seasonal concentration: 58.0% of occurrences are in Fall.",
+    "Color 'Lightblue-Whitestripe' appears 654 times but only in top position",
+    "Color 'Lightblue-Whitestripe' shows high seasonal concentration: 78.3% of occurrences are in Fall.",
+    "Color 'Lightdenim' never appears in shoes position",
+    "Color 'Lightdenim' shows high seasonal concentration: 47.4% of occurrences are in Fall.",
+    "Color 'Lightgrey-Whitegingham' appears 304 times but only in top position",
+    "Color 'Lightgrey-Whitegingham' shows high seasonal concentration: 75.0% of occurrences are in Fall.",
+    "Color 'Lightgrey-Whitestripe' is extremely rare, appearing only 7 times in the dataset.",
+    "Color 'Lightpink' never appears in midlayer position",
+    "Color 'Lightpink' shows high seasonal concentration: 45.7% of occurrences are in Winter.",
+    "Color 'Lightpink-Whitegingham' appears 115 times but only in top position",
+    "Color 'Lightpink-Whitegingham' shows high seasonal concentration: 87.8% of occurrences are in Fall.",
+    "Color 'Lightpink-Whitestripe' appears 384 times but only in top position",
+    "Color 'Lightpink-Whitestripe' shows high seasonal concentration: 76.6% of occurrences are in Fall.",
+    "Color 'Lightyellow' never appears in midlayer position",
+    "Color 'Lightyellow' never appears in shoes position",
+    "Color 'Lightyellow' shows high seasonal concentration: 48.1% of occurrences are in Fall.",
+    "Color 'Mediumcurry' appears 23 times but only in shoes position",
+    "Color 'Mediumcurry' shows high seasonal concentration: 100.0% of occurrences are in Summer.",
+    "Color 'Mediumdenim' never appears in shoes position",
+    "Color 'Midnightblue' is extremely rare, appearing only 6 times in the dataset.",
+    "Color 'Mint' never appears in midlayer position",
+    "Color 'Mint' never appears in shoes position",
+    "Color 'Mint' shows high seasonal concentration: 45.5% of occurrences are in Fall.",
+    "Color 'Mustard' never appears in shoes position",
+    "Color 'Mustard' shows high seasonal concentration: 57.5% of occurrences are in Fall.",
+    "Color 'Navy-Blackpolkadots' is extremely rare, appearing only 7 times in the dataset.",
+    "Color 'Navy-Whitegingham' appears 10 times but only in top position",
+    "Color 'Navy-Whitestripe' is extremely rare, appearing only 2 times in the dataset.",
+    "Color 'Offwhite' shows high seasonal concentration: 51.5% of occurrences are in Fall.",
+    "Color 'Olivegreen' shows high seasonal concentration: 47.9% of occurrences are in Fall.",
+    "Color 'Olivegreen-White' appears 113 times but only in shoes position",
+    "Color 'Olivegreen-White' shows high seasonal concentration: 64.6% of occurrences are in Summer.",
+    "Color 'Orange' never appears in top position",
+    "Color 'Oxblood' never appears in midlayer position",
+    "Color 'Oxblood' never appears in outerwear position",
+    "Color 'Oxblood' shows high seasonal concentration: 46.7% of occurrences are in Fall.",
+    "Color 'Photondust' appears 23 times but only in shoes position",
+    "Color 'Photondust' shows high seasonal concentration: 100.0% of occurrences are in Summer.",
+    "Color 'Purple' never appears in midlayer position",
+    "Color 'Purple' never appears in top position",
+    "Color 'Purple' shows high seasonal concentration: 76.3% of occurrences are in Fall.",
+    "Color 'Purple-Lavender-White' appears 13 times but only in shoes position",
+    "Color 'Red' never appears in midlayer position",
+    "Color 'Red' never appears in top position",
+    "Color 'Red-Black' appears 563 times but only in shoes position",
+    "Color 'Red-Black' shows high seasonal concentration: 99.8% of occurrences are in Summer.",
+    "Color 'Red-Blackbuffaloplaid' is extremely rare, appearing only 1 times in the dataset.",
+    "Color 'Redtartan' never appears in midlayer position",
+    "Color 'Redtartan' never appears in shoes position",
+    "Color 'Redtartan' never appears in top position",
+    "Color 'Redtartan' shows high seasonal concentration: 59.1% of occurrences are in Fall.",
+    "Color 'Royal-Black' appears 693 times but only in shoes position",
+    "Color 'Royal-Black' shows high seasonal concentration: 98.0% of occurrences are in Summer.",
+    "Color 'Royal-Blackbuffaloplaid' is extremely rare, appearing only 3 times in the dataset.",
+    "Color 'Royalblue' never appears in midlayer position",
+    "Color 'Royalblue' shows high seasonal concentration: 53.5% of occurrences are in Fall.",
+    "Color 'Royals' appears 60 times but only in shoes position",
+    "Color 'Royals' shows high seasonal concentration: 75.0% of occurrences are in Summer.",
+    "Color 'Rust' is extremely rare, appearing only 7 times in the dataset.",
+    "Color 'Sage' is extremely rare, appearing only 7 times in the dataset.",
+    "Color 'Sail' never appears in bottom position",
+    "Color 'Sail' never appears in midlayer position",
+    "Color 'Sail' never appears in outerwear position",
+    "Color 'Sail' shows high seasonal concentration: 96.7% of occurrences are in Summer.",
+    "Color 'Sand' never appears in midlayer position",
+    "Color 'Shadows' appears 157 times but only in shoes position",
+    "Color 'Shadows' shows high seasonal concentration: 59.9% of occurrences are in Summer.",
+    "Color 'Slate' never appears in shoes position",
+    "Color 'Slate' never appears in top position",
+    "Color 'Slate' shows high seasonal concentration: 57.4% of occurrences are in Summer.",
+    "Color 'St.Johns' is extremely rare, appearing only 7 times in the dataset.",
+    "Color 'Syracuse' appears 17 times but only in shoes position",
+    "Color 'Syracuse' shows high seasonal concentration: 100.0% of occurrences are in Summer.",
+    "Color 'Tan' shows high seasonal concentration: 55.1% of occurrences are in Winter.",
+    "Color 'Taupe' is extremely rare, appearing only 3 times in the dataset.",
+    "Color 'Teal' never appears in midlayer position",
+    "Color 'Teal' never appears in shoes position",
+    "Color 'Teal' shows high seasonal concentration: 62.7% of occurrences are in Summer.",
+    "Color 'Tobacco' never appears in midlayer position",
+    "Color 'Tobacco' never appears in outerwear position",
+    "Color 'Tobacco' shows high seasonal concentration: 55.6% of occurrences are in Winter.",
+    "Color 'Turquoise' never appears in midlayer position",
+    "Color 'Turquoise' never appears in outerwear position",
+    "Color 'Turquoise' shows high seasonal concentration: 99.2% of occurrences are in Summer.",
+    "Color 'Turquoise-White' is extremely rare, appearing only 1 times in the dataset.",
+    "Color 'Vegtan' never appears in midlayer position",
+    "Color 'Vegtan' never appears in outerwear position",
+    "Color 'Vegtan' shows high seasonal concentration: 60.8% of occurrences are in Fall.",
+    "Color 'Warmgrey' is extremely rare, appearing only 4 times in the dataset.",
+    "Color 'White' shows high seasonal concentration: 48.3% of occurrences are in Fall.",
+    "Color 'White-Hotpink' is extremely rare, appearing only 3 times in the dataset.",
+    "Color 'White-Khaki' appears 152 times but only in shoes position",
+    "Color 'White-Khaki' shows high seasonal concentration: 62.5% of occurrences are in Summer.",
+    "Color 'White-Lightgrey' appears 157 times but only in shoes position",
+    "Color 'White-Lightgrey' shows high seasonal concentration: 64.3% of occurrences are in Summer.",
+    "Color 'White-Offwhite' is extremely rare, appearing only 1 times in the dataset.",
+    "Color 'White-Orange' is extremely rare, appearing only 1 times in the dataset.",
+    "Color 'White-Red' is extremely rare, appearing only 3 times in the dataset.",
+    "Color 'Yellow' never appears in top position",
+    "Color combination anomaly: Whenever 'Mediumcurry' appears, it is always paired with 'Black'",
+    "Color combination anomaly: Whenever 'Photondust' appears, it is always paired with 'Black'",
+    "Color combination anomaly: Whenever 'Syracuse' appears, it is always paired with 'Black'",
+    "Duplicate outfit found 2 times: Burgundy/Burgundy/Black/Black/-",
+    "Duplicate outfit found 2 times: Burgundy/Charcoal/Black/Black/-",
+    "Duplicate outfit found 2 times: Burntorange/Charcoal/Black/Sand/-",
+    "Found 198 temporal errors (records with missing, pre-2020, or future dates)"
+  ]
+}

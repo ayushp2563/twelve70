@@ -12,6 +12,8 @@
  */
 
 import mysql from 'mysql2/promise';
+import { colorAliasResolver } from './aliasResolver';
+import { engine } from './sequentialFilter';
 
 // ============================================================================
 // 1. TYPES & INTERFACES
@@ -219,6 +221,10 @@ function resolveColor(colorName: string): string {
   if (!colorName) return '';
   const normalized = colorName.toLowerCase().trim().replace(/\s+/g, '');
   
+  if (engine.activeColors && engine.activeColors.size > 0) {
+    return colorAliasResolver.resolve(colorName, engine.activeColors);
+  }
+
   // If color exists in our map, use it directly
   if (colorFamilyMap[normalized]) return normalized;
 

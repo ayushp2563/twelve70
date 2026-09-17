@@ -1,0 +1,146 @@
+{
+  "evaluation": "Real predictions on held-out 15% test split (no simulation)",
+  "total_predictions": 3747,
+  "correct": 3734,
+  "incorrect": 13,
+  "accuracy": 0.9965,
+  "top_confusion_pairs": [
+    {
+      "actual": "Black",
+      "predicted": "Lightgrey",
+      "count": 3
+    },
+    {
+      "actual": "Black",
+      "predicted": "Brown",
+      "count": 2
+    },
+    {
+      "actual": "Brown",
+      "predicted": "Black",
+      "count": 2
+    },
+    {
+      "actual": "Burgundy",
+      "predicted": "Black",
+      "count": 1
+    },
+    {
+      "actual": "Forestgreen",
+      "predicted": "Lightgrey",
+      "count": 1
+    },
+    {
+      "actual": "Lightgrey",
+      "predicted": "Forestgreen",
+      "count": 1
+    },
+    {
+      "actual": "Mediumdenim",
+      "predicted": "Lightgrey",
+      "count": 1
+    },
+    {
+      "actual": "Navy",
+      "predicted": "Black",
+      "count": 1
+    },
+    {
+      "actual": "Slate",
+      "predicted": "Black",
+      "count": 1
+    }
+  ],
+  "per_color_accuracy": {
+    "Black-Whitehoundstooth": 1.0,
+    "Darkdenim": 1.0,
+    "Grey": 1.0,
+    "Khaki": 1.0,
+    "Khaki-Brownhoundstooth": 1.0,
+    "Mustard": 1.0,
+    "Navy-Whitestripe": 1.0,
+    "Offwhite": 1.0,
+    "Olivegreen": 1.0,
+    "Orange": 1.0,
+    "Red-Blackbuffaloplaid": 1.0,
+    "Royal-Blackbuffaloplaid": 1.0,
+    "White": 1.0,
+    "Lightgrey": 0.9994,
+    "Black": 0.997,
+    "Navy": 0.9821,
+    "Brown": 0.9813,
+    "Mediumdenim": 0.9787,
+    "Slate": 0.963,
+    "Forestgreen": 0.8,
+    "Burgundy": 0.75
+  },
+  "per_color_test_support": {
+    "Black": 1672,
+    "Black-Whitehoundstooth": 35,
+    "Brown": 107,
+    "Burgundy": 4,
+    "Darkdenim": 9,
+    "Forestgreen": 5,
+    "Grey": 2,
+    "Khaki": 14,
+    "Khaki-Brownhoundstooth": 6,
+    "Lightgrey": 1641,
+    "Mediumdenim": 47,
+    "Mustard": 20,
+    "Navy": 56,
+    "Navy-Whitestripe": 22,
+    "Offwhite": 6,
+    "Olivegreen": 26,
+    "Orange": 9,
+    "Red-Blackbuffaloplaid": 21,
+    "Royal-Blackbuffaloplaid": 15,
+    "Slate": 27,
+    "White": 3
+  },
+  "confidence_analysis": {
+    "high_confidence_correct": 1.0,
+    "low_confidence_correct": 0.9827,
+    "confidence_calibration": "GOOD",
+    "calibration_bins": [
+      {
+        "bin": "0-20%",
+        "count": 0,
+        "empirical_accuracy": null
+      },
+      {
+        "bin": "20-40%",
+        "count": 0,
+        "empirical_accuracy": null
+      },
+      {
+        "bin": "40-60%",
+        "count": 7,
+        "empirical_accuracy": 0.7143
+      },
+      {
+        "bin": "60-80%",
+        "count": 10,
+        "empirical_accuracy": 0.6
+      },
+      {
+        "bin": "80-100%",
+        "count": 3730,
+        "empirical_accuracy": 0.9981
+      }
+    ]
+  },
+  "error_patterns": {
+    "monochromatic_outfits": {
+      "accuracy": 0.9902,
+      "test_support": 816
+    },
+    "contrast_outfits": {
+      "accuracy": 0.9981,
+      "test_support": 2574
+    },
+    "rare_color_combinations": {
+      "accuracy": 0.9969,
+      "test_support": 961
+    }
+  }
+}

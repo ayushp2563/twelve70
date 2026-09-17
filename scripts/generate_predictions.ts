@@ -1,13 +1,15 @@
 #!/usr/bin/env ts-node
 /**
  * ============================================================================
- * BATCH PREDICTION SCRIPT
+ * BATCH PREDICTION & DATABASE SYNCHRONIZATION SCRIPT
  * ============================================================================
  *
  * Reads colorcombos.csv, predicts top_outer_color for every row where the
  * field is '-', then writes colorcombos_with_predictions.csv.
  *
- * Original file is NEVER modified.
+ * Additionally, if the MySQL database container is active (port 3307), it
+ * automatically synchronizes the new CSV color combinations into the
+ * database color_combos table, ensuring consistency.
  *
  * Usage:
  *   npx ts-node scripts/generate_predictions.ts
@@ -21,7 +23,9 @@
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
+import 'dotenv/config';
 import { SequentialFilterEngine } from '../src/sequentialFilter';
+import { pool, initializeDatabase, closeDatabase } from '../src/config/database';
 
 const ROOT     = path.join(__dirname, '..');
 const INPUT    = path.join(ROOT, 'data', 'colorcombos.csv');
@@ -44,7 +48,7 @@ function progress(current: number, total: number): string {
 
 async function main() {
   console.log('╔══════════════════════════════════════════╗');
-  console.log('║   twelve70 — Batch Prediction Script      ║');
+  console.log('║   twelve70 — Batch Prediction & Sync      ║');
   console.log('╚══════════════════════════════════════════╝\n');
 
   // ── Step 1: Initialise the engine ─────────────────────────────────────────
@@ -53,7 +57,57 @@ async function main() {
   await eng.initialize(ROOT);
   console.log('');
 
-  // ── Step 2: Read original CSV line by line ────────────────────────────────
+  // ── Step 2: Try to connect to MySQL database ──────────────────────────────
+  let dbActive = false;
+  try {
+    console.log('⏳ Attempting to connect to MySQL database on port 3307…');
+    await initializeDatabase();
+    dbActive = true;
+    console.log('✅ Connected to database successfully.');
+  } catch (err) {
+    console.warn('⚠️  Could not connect to database. Skipping SQL synchronization.');
+  }
+  console.log('');
+
+  // ── Step 3: Synchronise combinations if DB is active ──────────────────────
+  if (dbActive) {
+    try {
+      console.log('⏳ Synchronizing CSV combinations to MySQL table `color_combos`…');
+      const [existingRows]: any = await pool.query(
+        'SELECT id, top_color, bottom_color, outerwear_color, footwear_color, top_outer_color FROM color_combos'
+      );
+      
+      const existingKeys = new Set<string>();
+      for (const row of existingRows) {
+        const key = `${row.top_color}_${row.bottom_color}_${row.outerwear_color}_${row.footwear_color}_${row.top_outer_color}`.toLowerCase();
+        existingKeys.add(key);
+        if (row.id) {
+          existingKeys.add(row.id.toLowerCase());
+        }
+      }
+
+      let insertedCount = 0;
+      for (const r of eng.getAllRows()) {
+        const key = `${r.topColor}_${r.bottomColor}_${r.outerwearColor}_${r.footwearColor}_${r.topOuterColor}`.toLowerCase();
+        if (!existingKeys.has(key)) {
+          const newId = require('crypto').randomUUID();
+          await pool.query(
+            `INSERT INTO color_combos (id, top_color, bottom_color, outerwear_color, footwear_color, top_outer_color, is_active, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, 1, NOW(), NOW())`,
+            [newId, r.topColor, r.bottomColor, r.outerwearColor, r.footwearColor, r.topOuterColor]
+          );
+          insertedCount++;
+          existingKeys.add(key);
+        }
+      }
+      console.log(`✅ Database synchronized: Added ${insertedCount} new color combinations.`);
+    } catch (dbSyncErr) {
+      console.error('❌ Failed to synchronize combinations to database:', dbSyncErr);
+    }
+    console.log('');
+  }
+
+  // ── Step 4: Read original CSV line by line ────────────────────────────────
   console.log('⏳ Scanning original CSV…');
   const allLines: string[] = [];
   await new Promise<void>((resolve, reject) => {
@@ -66,7 +120,7 @@ async function main() {
   const totalRows = allLines.length - 1; // subtract header
   console.log(`   Found ${totalRows.toLocaleString()} data rows\n`);
 
-  // ── Step 3: Process rows ──────────────────────────────────────────────────
+  // ── Step 5: Process rows & run predictions ────────────────────────────────
   const header = allLines[0] +
     ',predicted_top_outer_color,prediction_score,prediction_confidence,prediction_reasons';
 
@@ -127,12 +181,12 @@ async function main() {
 
   process.stdout.write(`\r   ${progress(totalRows, totalRows)}\n\n`);
 
-  // ── Step 4: Write output CSV ──────────────────────────────────────────────
+  // ── Step 6: Write output CSV ──────────────────────────────────────────────
   fs.writeFileSync(OUTPUT, outputLines.join('\n'), 'utf-8');
   console.log(`✅ Written: ${path.basename(OUTPUT)}`);
   console.log(`   Size: ${(fs.statSync(OUTPUT).size / 1024 / 1024).toFixed(2)} MB\n`);
 
-  // ── Step 5: Write summary JSON ────────────────────────────────────────────
+  // ── Step 7: Write summary JSON ────────────────────────────────────────────
   const avgScore = predicted > 0 ? Math.round(totalScore / predicted) : 0;
   const summary = {
     generatedAt:     now,
@@ -154,7 +208,12 @@ async function main() {
   fs.writeFileSync(SUMMARY, JSON.stringify(summary, null, 2), 'utf-8');
   console.log(`✅ Written: ${path.basename(SUMMARY)}\n`);
 
-  // ── Step 6: Print summary ─────────────────────────────────────────────────
+  // ── Step 8: Close database ────────────────────────────────────────────────
+  if (dbActive) {
+    await closeDatabase();
+  }
+
+  // ── Step 9: Print summary ─────────────────────────────────────────────────
   console.log('┌─────────────────────────────────┐');
   console.log('│          SUMMARY                │');
   console.log('├─────────────────────────────────┤');
