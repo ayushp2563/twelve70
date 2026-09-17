@@ -13,6 +13,43 @@ The system is backed by **25,000 hand-curated outfit combinations** from the pro
 
 ---
 
+## ML Model & Company Integration
+
+### Where to find the model
+
+| Artifact | Path | Role |
+|----------|------|------|
+| **Production ONNX model** (used at serve time) | [`models/outfit_ranker.onnx`](models/outfit_ranker.onnx) | LightGBM re-ranker loaded by Node.js via ONNX Runtime |
+| Inference + feature extraction | [`src/ml/inference.ts`](src/ml/inference.ts), [`src/ml/featureExtractor.ts`](src/ml/featureExtractor.ts) | Loads the ONNX file and re-ranks Stage-1 candidates |
+| Training / export pipeline | [`ml_pipeline/`](ml_pipeline/) (start with [`ml_pipeline/train.py`](ml_pipeline/train.py)) | Retrains and writes a new `models/outfit_ranker.onnx` |
+| Model metrics & caveats | [`company_summary_report.md`](company_summary_report.md) | Honest evaluation summary for stakeholders |
+
+The live server initializes the model on boot. Look for:
+
+```text
+✅ Machine Learning Re-Ranking Engine (LightGBM/ONNX) successfully initialized.
+```
+
+If the model file is missing, the API still works — it falls back to the rule-engine ranking only.
+
+### How to integrate into Twelve70’s system
+
+Nothing from this repo is assumed to be in production yet. Follow the phased handoff guide:
+
+**→ [`COMPANY_INTEGRATION_GUIDE.md`](COMPANY_INTEGRATION_GUIDE.md)**
+
+Order of integration:
+
+1. Sequential top-outer color logic  
+2. Any-sequence outfit picker  
+3. ONNX ML re-ranker  
+4. Click / save history  
+5. Monthly profile rollup + personalization  
+
+That guide covers APIs, env vars, data files to ship, acceptance checks, and common pitfalls.
+
+---
+
 ## Project Structure
 
 ```
@@ -258,6 +295,11 @@ Level 3: FAMILY SCORING
 | File | Purpose |
 |------|---------|
 | `src/sequentialFilter.ts` | The entire matching engine — loads CSV, scores colors, exposes step functions |
+| `src/anySequenceFilter.ts` | Any-order garment selection + pairwise graph ranking |
+| `src/ml/inference.ts` | ONNX re-ranker (loads `models/outfit_ranker.onnx`) |
+| `models/outfit_ranker.onnx` | Deployed LightGBM ranking model |
+| `ml_pipeline/train.py` | Retrain and export the ONNX model |
+| `COMPANY_INTEGRATION_GUIDE.md` | Step-by-step guide to integrate this into the company product |
 | `src/colorMatcher.ts` | Older DB-based matcher, still used by legacy endpoint |
 | `scripts/generate_predictions.ts` | Batch-processes the 25k CSV and fills in missing `top_outer_color` values |
 | `data/colorcombos.csv` | The source-of-truth dataset (never modified) |
